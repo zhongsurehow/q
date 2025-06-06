@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>字幕动画 - Part 7 (Valve 2)</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        background-color: #fef9e7; /* Warm yellow, for focus/attention */
+        overflow: hidden;
+    }
+    .container {
+        width: 800px;
+        height: 450px;
+        position: relative;
+        background-color: #fffdf9;
+        box-shadow: 0 0 20px rgba(0,0,0,0.05);
+        border: 1px solid #fdebd0;
+        overflow: hidden;
+    }
+    .subtitle {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 26px;
+        color: #784212; /* Brown text */
+        padding: 10px 20px;
+        background-color: rgba(254, 249, 231, 0.85);
+        border-radius: 5px;
+        opacity: 0;
+        text-align: center;
+        z-index: 100;
+    }
+
+    /* Scene Elements */
+    #valve2-icon-display-svg { /* Similar to part 5 but different color */
+        position: absolute;
+        top: 30px;
+        left: 30px;
+        width: 70px;
+        height: 70px;
+        opacity: 0;
+        z-index: 10;
+    }
+    #valve2-icon-display-svg .valve-body { fill: #27ae60; } /* Green for this valve */
+    #valve2-icon-display-svg .valve-cross { fill: #ecf0f1; transform-origin: center; }
+
+    #compass-icon-svg {
+        position: absolute;
+        top: 25px;
+        left: 110px; /* Next to valve icon */
+        width: 80px;
+        height: 80px;
+        opacity: 0;
+    }
+    #compass-needle { transform-origin: center; transition: transform 0.5s ease-in-out; }
+
+    #keyword-setting-scene {
+        position: absolute;
+        top: 120px;
+        left: 50px;
+        width: 300px;
+        height: 150px;
+        opacity: 0;
+    }
+    #calendar-page-svg { width: 120px; height: 120px; }
+    #calendar-text { font-size: 20px; fill: #2c3e50; text-anchor: middle; }
+    #keyword-text-display {
+        position: absolute;
+        top: 50px;
+        left: 150px;
+        font-size: 32px;
+        font-weight: bold;
+        color: #d35400; /* Keyword color */
+        opacity: 0;
+        border-bottom: 2px solid #d35400;
+        padding-bottom: 5px;
+    }
+
+    #information-flow-scene {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        z-index: 5; /* Below keyword anchor but above bg */
+    }
+    .info-blob {
+        position: absolute;
+        border-radius: 10px;
+        padding: 5px 10px;
+        font-size: 16px;
+        color: white;
+        opacity: 0.9;
+        box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+        white-space: nowrap;
+    }
+    .relevant-blob { background-color: #2ecc71; /* Green for relevant */ }
+    .irrelevant-blob { background-color: #95a5a6; /* Grey for irrelevant */ }
+
+    #question-mark-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -150px) scale(0.5); /* Position above keyword */
+        font-size: 80px;
+        font-weight: bold;
+        color: #3498db;
+        opacity: 0;
+        z-index: 20;
+    }
+    #keyword-anchor-text { /* Displayed keyword acting as anchor */
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 40px;
+        font-weight: bold;
+        color: #d35400;
+        opacity: 0;
+        padding: 10px 20px;
+        border: 3px dashed #d35400;
+        border-radius: 10px;
+        z-index: 15;
+    }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div id="subtitle17" class="subtitle">🧭第二个阀门：主题感知锚</div>
+    <div id="subtitle18" class="subtitle">每天设置一个“今日关键词”.</div>
+    <div id="subtitle19" class="subtitle">遇到信息，问自己一句：</div>
+    <div id="subtitle20" class="subtitle">这和我今天的关键词有关吗？</div>
+
+    <!-- Valve 2 Icon (Green) -->
+    <svg id="valve2-icon-display-svg" viewBox="0 0 100 100">
+        <circle class="valve-body" cx="50" cy="50" r="40" stroke="#1e8449" stroke-width="5"/>
+        <rect class="valve-cross" x="45" y="20" width="10" height="60"/>
+        <rect class="valve-cross" x="20" y="45" width="60" height="10" id="valve2-crossbar-display"/>
+    </svg>
+    <!-- Compass Icon -->
+    <svg id="compass-icon-svg" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="45" fill="#fff" stroke="#34495e" stroke-width="3"/>
+        <line x1="50" y1="10" x2="50" y2="90" stroke="#bdc3c7" stroke-width="2"/>
+        <line x1="10" y1="50" x2="90" y2="50" stroke="#bdc3c7" stroke-width="2"/>
+        <polygon id="compass-needle" points="50,10 40,50 50,45 60,50" fill="#e74c3c"/> <!-- Needle pointing North -->
+        <circle cx="50" cy="50" r="5" fill="#34495e"/>
+    </svg>
+
+    <div id="keyword-setting-scene">
+        <svg id="calendar-page-svg" viewBox="0 0 100 100">
+            <rect x="10" y="10" width="80" height="80" fill="#ecf0f1" stroke="#bdc3c7" stroke-width="2"/>
+            <rect x="10" y="10" width="80" height="20" fill="#3498db"/>
+            <text x="50" y="24" fill="#fff" font-size="10" text-anchor="middle">TODAY</text>
+            <text id="calendar-text" x="50" y="60">🗓️</text>
+        </svg>
+        <div id="keyword-label-static" style="position: absolute; top: 20px; left: 150px; font-size: 18px; color: #566573; opacity: 0;">今日关键词:</div>
+        <div id="keyword-text-display" style="top: 45px;">专注</div> <!-- Example Keyword -->
+    </div>
+
+    <div id="information-flow-scene">
+        <!-- Info blobs will be added here by JS -->
+    </div>
+    <div id="question-mark-text">?</div>
+    <div id="keyword-anchor-text">专注</div>
+
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+<script>
+    const s17Start = 49733;
+    const s17Duration = 52600 - 49733; // 2867ms
+
+    const s18Start = 52833;
+    const s18Duration = 55766 - 52833; // 2933ms
+
+    const s19Start = 56200;
+    const s19Duration = 58400 - 56200; // 2200ms
+
+    const s20Start = 58800;
+    const s20Duration = 61633 - 58800; // 2833ms
+
+    const timeline = gsap.timeline();
+    const container = document.querySelector('.container');
+
+    const valve2Icon = document.getElementById('valve2-icon-display-svg');
+    const valve2Crossbar = document.getElementById('valve2-crossbar-display');
+    const compassIcon = document.getElementById('compass-icon-svg');
+    const compassNeedle = document.getElementById('compass-needle');
+
+    const keywordSettingScene = document.getElementById('keyword-setting-scene');
+    const keywordTextDisplay = document.getElementById('keyword-text-display');
+    const calendarPage = document.getElementById('calendar-page-svg');
+    const keywordLabelStatic = document.getElementById('keyword-label-static'); // Added for the new label
+
+    const informationFlowScene = document.getElementById('information-flow-scene');
+    const questionMarkText = document.getElementById('question-mark-text');
+    const keywordAnchorText = document.getElementById('keyword-anchor-text');
+    const exampleKeyword = "专注"; // Used for display and logic
+
+    // --- Valve 2 Icon & Compass Intro ---
+    // Subtitle 17: 🧭第二个阀门：主题感知锚
+    const s17Time = s17Start / 1000;
+    timeline.to("#subtitle17", { opacity: 1, duration: 0.5, ease: "power2.out" }, s17Time);
+    timeline.to(valve2Icon, { opacity: 1, scale: [0.5, 1], duration: 0.6, ease: "elastic.out(1, 0.5)" }, s17Time + 0.2);
+    timeline.to(valve2Crossbar, { rotation: 90, svgOrigin: "50 50", duration: 0.5, ease: "power1.inOut" }, s17Time + 0.4); // Valve closes
+    timeline.to(compassIcon, { opacity: 1, scale: [0.5, 1], duration: 0.6, ease: "elastic.out(1, 0.5)" }, s17Time + 0.6);
+    timeline.to(compassNeedle, { rotation: "+=720", duration: 1, ease: "power2.out" }, s17Time + 0.8); // Compass needle spins
+
+    timeline.to(["#subtitle17", valve2Icon, compassIcon], { opacity: 0, duration: 0.4, ease: "power2.in" }, (s17Start + s17Duration - 400) / 1000);
+
+    // --- Setting the "Keyword of the Day" ---
+    // Subtitle 18: 每天设置一个“今日关键词”.
+    const s18Time = s18Start / 1000;
+    timeline.to("#subtitle18", { opacity: 1, duration: 0.5, ease: "power2.out" }, s18Time);
+    timeline.to(keywordSettingScene, { opacity: 1, duration: 0.1 }, s18Time + 0.1);
+    timeline.from(calendarPage, { opacity:0, x: -30, duration: 0.5, ease: "power1.out"}, s18Time + 0.2);
+    timeline.to("#keyword-label-static", { opacity: 1, duration: 0.4 }, s18Time + 0.5); // Animate static label
+
+    // Typing animation for keyword
+    timeline.fromTo(keywordTextDisplay,
+        { textContent: "", opacity: 0, scaleX:0 },
+        {
+            opacity: 1,
+            scaleX:1,
+            duration: 0.1, // Quick reveal of container
+            onComplete: () => { // Then type
+                 gsap.to(keywordTextDisplay, { textContent: exampleKeyword, duration: 0.5, ease: "none" });
+            }
+        },
+        s18Time + 0.7); // Timing should be fine, appears after label
+
+
+    timeline.to(["#subtitle18", keywordSettingScene], { opacity: 0, duration: 0.4, ease: "power2.in" }, (s18Start + s18Duration - 400) / 1000);
+
+
+    // --- Information Blobs Flow In ---
+    // Subtitle 19: 遇到信息，问自己一句：
+    const s19Time = s19Start / 1000;
+    timeline.to("#subtitle19", { opacity: 1, duration: 0.5, ease: "power2.out" }, s19Time);
+    timeline.to(informationFlowScene, { opacity: 1, duration: 0.1 }, s19Time + 0.2);
+    timeline.call(spawnInfoBlobs, [exampleKeyword, 15], s19Time + 0.3); // Spawn blobs
+    // --- Questioning Relevance ---
+    timeline.to(questionMarkText, { opacity: 1, scale: 1, duration: 0.5, ease: "elastic.out(1, 0.5)" }, s19Time + 1.0);
+
+    timeline.to("#subtitle19", { opacity: 0, duration: 0.4, ease: "power2.in" }, (s19Start + s19Duration - 400) / 1000);
+    // Question mark and blobs remain for next subtitle
+
+    // --- Filtering Blobs based on Keyword Anchor ---
+    // Subtitle 20: 这和我今天的关键词有关吗？
+    const s20Time = s20Start / 1000;
+    timeline.to("#subtitle20", { opacity: 1, duration: 0.5, ease: "power2.out" }, s20Time);
+    timeline.to(questionMarkText, { opacity: 0, scale: 0.5, duration: 0.3 }, s20Time + 0.2); // Question mark fades
+    timeline.to(keywordAnchorText, { opacity: 1, scale:[0.8,1], duration: 0.5, ease: "back.out(1.7)" }, s20Time + 0.5);
+
+    timeline.call(filterBlobsByKeyword, [keywordAnchorText.getBoundingClientRect()], s20Time + 0.8);
+
+    // End of part
+    const s20EndTime = (s20Start + s20Duration) / 1000;
+    timeline.to(["#subtitle20", keywordAnchorText, informationFlowScene], {
+        opacity: 0,
+        duration: 0.5,
+        ease: "power2.in",
+        onComplete: () => { informationFlowScene.innerHTML = ''; } // Clear blobs
+    }, s20EndTime - 0.5);
+
+
+    const relevantKeywords = ["专注", "学习", "工作", "提升", "效率", "思考"];
+    const irrelevantKeywords = ["八卦", "新闻", "游戏", "娱乐", "社交", "购物", "视频"];
+
+    function spawnInfoBlobs(currentKeyword, count = 10) {
+        informationFlowScene.innerHTML = ''; // Clear previous
+        for (let i = 0; i < count; i++) {
+            const blob = document.createElement('div');
+            blob.classList.add('info-blob');
+            // Determine if blob is relevant to currentKeyword or a generic relevant/irrelevant term
+            let isRelevant = Math.random() < 0.4;
+            let text;
+            if (isRelevant) {
+                blob.classList.add('relevant-blob');
+                text = relevantKeywords[Math.floor(Math.random() * relevantKeywords.length)];
+                if(Math.random() < 0.5) text = currentKeyword; // Higher chance for the actual current keyword to appear if relevant
+            } else {
+                blob.classList.add('irrelevant-blob');
+                text = irrelevantKeywords[Math.floor(Math.random() * irrelevantKeywords.length)];
+            }
+            blob.textContent = text;
+            blob.dataset.relevant = isRelevant; // Store relevance for filtering logic
+
+            const startX = Math.random() > 0.5 ? -100 : container.offsetWidth + 100; // Start from off-screen left or right
+            const startY = Math.random() * (container.offsetHeight - 50) + 25; // Random Y position
+            blob.style.left = startX + 'px';
+            blob.style.top = startY + 'px';
+            informationFlowScene.appendChild(blob);
+
+            anime({
+                targets: blob,
+                translateX: startX < 0 ? anime.random(200, 400) : anime.random(-200, -400), // Move towards center
+                translateY: anime.random(-30, 30), // Slight vertical drift
+                opacity: [0, 0.9],
+                scale: [0.5, 1],
+                duration: anime.random(1500, 2500),
+                easing: 'easeOutQuad',
+                delay: i * 100
+            });
+        }
+    }
+
+    function filterBlobsByKeyword(anchorRect) {
+        const blobs = informationFlowScene.querySelectorAll('.info-blob');
+        const containerRect = container.getBoundingClientRect();
+
+        blobs.forEach(blob => {
+            const isRelevant = blob.dataset.relevant === 'true';
+            // Animation for relevant blobs (attraction to anchor)
+            if (isRelevant) {
+                anime({
+                    targets: blob,
+                    left: anchorRect.left - containerRect.left + anchorRect.width/2 - blob.offsetWidth/2 + anime.random(-20,20),
+                    top: anchorRect.top - containerRect.top + anchorRect.height/2 - blob.offsetHeight/2 + anime.random(-20,20),
+                    scale: 1.1,
+                    duration: 800,
+                    backgroundColor: '#2ecc71', // Emphasize relevant
+                    easing: 'easeOutBack'
+                });
+            }
+            // Animation for irrelevant blobs (repulsion from anchor)
+            else {
+                anime({
+                    targets: blob,
+                    opacity: 0.3,
+                    scale: 0.7,
+                    filter: 'blur(1px)',
+                    translateX: parseFloat(blob.style.left) < container.offsetWidth / 2 ? '-=100' : '+=100', // Move further away
+                    duration: 800,
+                    easing: 'easeOutExpo' // Changed from easeOutQuad
+                });
+            }
+        });
+    }
+
+    // timeline.play(); // For testing
+
+</script>
+</body>
+</html>

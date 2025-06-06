@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>字幕动画 - Part 4</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        background-color: #f4f6f6; /* Calmer, lighter background */
+        overflow: hidden;
+    }
+    .container {
+        width: 800px;
+        height: 450px;
+        position: relative;
+        background-color: #eaf2f8; /* Light blue, serene */
+        box-shadow: 0 0 20px rgba(0,0,0,0.05);
+        border: 1px solid #d4e6f1;
+        overflow: hidden;
+    }
+    .subtitle {
+        position: absolute;
+        bottom: 25px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 26px;
+        color: #17202a; /* Darker text for light bg */
+        padding: 10px 20px;
+        background-color: rgba(255, 255, 255, 0.7);
+        border-radius: 5px;
+        opacity: 0;
+        text-align: center;
+        z-index: 100;
+    }
+
+    /* Scene 1: Stop Catching */
+    #stop-catching-scene {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+    }
+    #stop-icon-svg { /* X mark or hand */
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 150px;
+        height: 150px;
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0;
+        z-index: 10;
+    }
+    #stop-icon-svg line {
+        stroke: #e74c3c; /* Red color for stop */
+        stroke-width: 15;
+        stroke-linecap: round;
+    }
+
+    /* Scene 2: Valve System */
+    #valve-system-scene {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+    }
+    #pipe-system-svg {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 400px;
+        height: 200px;
+        transform: translate(-50%, -60%); /* Shift up a bit */
+        opacity: 0;
+    }
+    .pipe {
+        fill: #95a5a6; /* Grey for pipes */
+        stroke: #7f8c8d;
+        stroke-width: 2;
+    }
+    #valve-handle {
+        fill: #e67e22; /* Orange for handle */
+        cursor: pointer;
+        transform-origin: center;
+    }
+    #water-flow-indicator { /* A small stream stopped by valve */
+        fill: #3498db;
+        opacity: 0.8;
+    }
+
+    /* Scene 3: Liya's Wisdom */
+    #liya-wisdom-scene {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    #sprout-icon {
+        font-size: 50px; opacity: 0; transform: scale(0.5);
+    }
+    #pouch-icon-svg {
+        width: 80px; height: 80px; opacity: 0; margin-top: 10px;
+        filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.2));
+    }
+    .valve-icon-svg {
+        width: 60px; height: 60px; opacity: 0; margin: 0 15px;
+        filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.15));
+    }
+    #valve-icons-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+        opacity: 0;
+    }
+    .valve-text {
+        font-size: 18px;
+        color: #2c3e50;
+        text-align: center;
+        margin-top: 5px;
+        opacity: 0;
+    }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div id="subtitle7" class="subtitle">所以，聪明人不去“接”</div>
+    <div id="subtitle8" class="subtitle">而是建一个有“阀门”的系统</div>
+    <div id="subtitle9" class="subtitle">🌱《Liya的智慧锦囊》今天送你三个 “认知止水阀”</div>
+
+    <!-- Scene 1: Stop Catching -->
+    <div id="stop-catching-scene">
+        <!-- Optional: Could show a faint, chaotic water background that then fades -->
+        <svg id="stop-icon-svg" viewBox="0 0 100 100">
+            <line x1="10" y1="10" x2="90" y2="90" />
+            <line x1="90" y1="10" x2="10" y2="90" />
+        </svg>
+    </div>
+
+    <!-- Scene 2: Valve System -->
+    <div id="valve-system-scene">
+        <svg id="pipe-system-svg" viewBox="0 0 400 200">
+            <!-- Water flowing from left, stopped at valve -->
+            <rect x="0" y="80" width="160" height="40" class="pipe" /> <!-- Inlet pipe -->
+            <path id="water-flow-indicator" d="M 0 85 H 155 Q 150 100 155 115 H 0 Z" /> <!-- Water shape -->
+
+            <rect x="150" y="70" width="100" height="60" class="pipe" /> <!-- Valve body -->
+            <circle id="valve-handle" cx="200" cy="100" r="25" /> <!-- Valve handle -->
+            <rect x="195" y="60" width="10" height="80" fill="#c0392b" id="valve-gate"/> <!-- Gate (closed) -->
+
+            <rect x="240" y="80" width="160" height="40" class="pipe" /> <!-- Outlet pipe (empty) -->
+        </svg>
+    </div>
+
+    <!-- Scene 3: Liya's Wisdom -->
+    <div id="liya-wisdom-scene">
+        <div id="sprout-icon">🌱</div>
+        <svg id="pouch-icon-svg" viewBox="0 0 100 100"> <!-- Simple pouch icon -->
+            <path d="M20,30 Q50,10 80,30 T80,70 Q50,90 20,70 T20,30 Z" fill="#f39c12"/>
+            <rect x="45" y="5" width="10" height="25" fill="#d35400"/> <!-- Strap -->
+             <circle cx="50" cy="30" r="5" fill="#d35400"/> <!-- Button -->
+        </svg>
+        <div id="valve-icons-container">
+            <svg class="valve-icon-svg" id="valve-icon-1" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" fill="#2980b9" stroke="#2c3e50" stroke-width="5"/>
+                <rect x="45" y="20" width="10" height="60" fill="#ecf0f1"/>
+                <rect x="20" y="45" width="60" height="10" fill="#ecf0f1" transform="rotate(0 50 50)" class="valve-cross-1"/>
+            </svg>
+            <svg class="valve-icon-svg" id="valve-icon-2" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" fill="#27ae60" stroke="#2c3e50" stroke-width="5"/>
+                <rect x="45" y="20" width="10" height="60" fill="#ecf0f1"/>
+                <rect x="20" y="45" width="60" height="10" fill="#ecf0f1" transform="rotate(0 50 50)" class="valve-cross-2"/>
+            </svg>
+            <svg class="valve-icon-svg" id="valve-icon-3" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" fill="#8e44ad" stroke="#2c3e50" stroke-width="5"/>
+                <rect x="45" y="20" width="10" height="60" fill="#ecf0f1"/>
+                <rect x="20" y="45" width="60" height="10" fill="#ecf0f1" transform="rotate(0 50 50)" class="valve-cross-3"/>
+            </svg>
+        </div>
+        <div id="valve-text-desc" class="valve-text">三个“认知止水阀”</div>
+    </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+<script>
+    const s7Start = 19533;
+    const s7Duration = 21566 - 19533; // 2033ms
+
+    const s8Start = 22200;
+    const s8Duration = 25133 - 22200; // 2933ms
+
+    const s9Start = 25366;
+    const s9Duration = 30033 - 25366; // 4667ms
+
+    const timeline = gsap.timeline();
+
+    const stopCatchingScene = document.getElementById('stop-catching-scene');
+    const stopIcon = document.getElementById('stop-icon-svg');
+    const valveSystemScene = document.getElementById('valve-system-scene');
+    const pipeSystem = document.getElementById('pipe-system-svg');
+    const valveHandle = document.getElementById('valve-handle');
+    const valveGate = document.getElementById('valve-gate');
+    const waterFlowIndicator = document.getElementById('water-flow-indicator');
+    const liyaWisdomScene = document.getElementById('liya-wisdom-scene');
+
+    // --- Scene 1: Stop Catching Animation ---
+    // Subtitle 7: 所以，聪明人不去“接”
+    const s7Time = s7Start / 1000;
+    timeline.to(stopCatchingScene, { opacity: 1, duration: 0.1 }, s7Time);
+    timeline.to(stopIcon, { opacity: 1, scale: 1, duration: 0.5, ease: "elastic.out(1, 0.5)" }, s7Time + 0.1);
+    timeline.to("#subtitle7", { opacity: 1, duration: 0.5, ease: "power2.out" }, s7Time);
+
+    timeline.to(["#subtitle7", stopIcon], { opacity: 0, duration: 0.5, ease: "power2.in" }, (s7Start + s7Duration - 500) / 1000);
+    timeline.to(stopCatchingScene, { opacity: 0, duration: 0.1 }, (s7Start + s7Duration) / 1000);
+
+
+    // --- Scene 2: Valve System Animation ---
+    // Subtitle 8: 而是建一个有“阀门”的系统
+    const s8Time = s8Start / 1000;
+    timeline.to(valveSystemScene, { opacity: 1, duration: 0.1 }, s8Time);
+    timeline.fromTo(pipeSystem, { opacity:0, y: 50 }, { opacity: 1, y: 0, duration: 0.8, ease: "back.out(1.2)" }, s8Time + 0.1);
+    timeline.to("#subtitle8", { opacity: 1, duration: 0.5, ease: "power2.out" }, s8Time);
+
+    // Animate valve handle rotating to close the valve
+    timeline.fromTo(valveHandle, { rotation: 0 }, { rotation: -90, duration: 0.7, ease: "power1.inOut", svgOrigin:"200 100" }, s8Time + 0.8);
+    timeline.to(valveGate, { fill: "#2ecc71", duration: 0.3 }, s8Time + 1.4); // Gate turns green (closed and secure)
+    timeline.to(waterFlowIndicator, { scaleX: 0, transformOrigin: "right", duration: 0.5, ease: "power1.in" }, s8Time + 1); // Water flow stops
+
+
+    timeline.to(["#subtitle8", pipeSystem], { opacity: 0, duration: 0.5, ease: "power2.in" }, (s8Start + s8Duration - 500) / 1000);
+    timeline.to(valveSystemScene, { opacity: 0, duration: 0.1 }, (s8Start + s8Duration) / 1000);
+
+    // --- Scene 3: Liya's Wisdom & Valves Intro Animation ---
+    // Subtitle 9: 🌱《Liya的智慧锦囊》今天送你三个 “认知止水阀”
+    const s9Time = s9Start / 1000;
+    timeline.to(liyaWisdomScene, { opacity: 1, duration: 0.1 }, s9Time);
+    timeline.set("#subtitle9", { textContent: "🌱《Liya的智慧锦囊》今天送你", immediateRender: true }, s9Time);
+    timeline.to("#subtitle9", { opacity: 1, duration: 0.5, ease: "power2.out" }, s9Time);
+
+    timeline.to("#sprout-icon", { opacity: 1, scale: 1, duration: 0.5, ease: "elastic.out(1, 0.7)" }, s9Time + 0.3);
+    timeline.to("#pouch-icon-svg", { opacity: 1, scale: [0.5, 1], duration: 0.5, ease: "back.out(1.7)" }, s9Time + 0.6);
+
+    timeline.to("#valve-icons-container", { opacity: 1, duration: 0.1 }, s9Time + 1.0);
+    const valveIcons = ['#valve-icon-1', '#valve-icon-2', '#valve-icon-3'];
+    // Animate the three cognitive valve icons appearing sequentially
+    valveIcons.forEach((icon, index) => {
+        timeline.fromTo(icon,
+            { opacity: 0, y: 20, scale:0.5 },
+            { opacity: 1, y: 0, scale:1, duration: 0.4, ease: "back.out(1.5)" },
+            s9Time + 1.2 + index * 0.2);
+        // Rotate cross bar on valve icons to show closed state
+        timeline.to(`${icon} .valve-cross-${index+1}`, { rotation: 90, svgOrigin: "50 50", duration: 0.5, ease: "power1.inOut"}, s9Time + 1.5 + index * 0.2);
+    });
+    timeline.to("#valve-text-desc", { opacity:1, duration:0.5 }, s9Time + 1.8);
+
+
+    // Fade out for end of s9
+    const s9EndTime = (s9Start + s9Duration) / 1000;
+    timeline.to(["#subtitle9", "#sprout-icon", "#pouch-icon-svg", "#valve-icons-container", "#valve-text-desc"], {
+        opacity: 0,
+        duration: 0.5,
+        ease: "power2.in"
+    }, s9EndTime - 0.5);
+    timeline.to(liyaWisdomScene, { opacity: 0, duration: 0.1 }, s9EndTime);
+
+    // timeline.play(); // For testing
+
+</script>
+</body>
+</html>

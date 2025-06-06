@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>字幕动画 - Part 6 (Valve 1 Suggestion)</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        background-color: #f0f4f8; /* Light, neutral blue */
+        overflow: hidden;
+    }
+    .container {
+        width: 800px;
+        height: 450px;
+        position: relative;
+        background-color: #ffffff;
+        box-shadow: 0 0 20px rgba(0,0,0,0.05);
+        border: 1px solid #d6e0ea;
+        overflow: hidden;
+    }
+    .subtitle {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 26px;
+        color: #2c3e50;
+        padding: 10px 20px;
+        background-color: rgba(240, 244, 248, 0.9);
+        border-radius: 5px;
+        opacity: 0;
+        text-align: center;
+        z-index: 100;
+    }
+
+    /* Scene Elements */
+    #suggestion-scene {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        opacity: 1; /* Scene is active from start of this part */
+    }
+    #suggestion-text-prefix { /* For "建议：" */
+        position: absolute;
+        top: 50px;
+        left: 50px;
+        font-size: 30px;
+        font-weight: bold;
+        color: #3498db;
+        opacity: 0;
+    }
+    #timer-svg {
+        position: absolute;
+        top: 100px;
+        left: 50px;
+        width: 150px;
+        height: 150px;
+        opacity: 0;
+    }
+    #timer-hand { transform-origin: 75px 75px; stroke: #e74c3c; stroke-width: 4; }
+    #timer-markings circle { fill: #bdc3c7; }
+    #timer-10min-text { font-size: 18px; fill: #2c3e50; text-anchor: middle; }
+
+    #content-choice-scene {
+        position: absolute;
+        top: 80px;
+        left: 250px; /* To the right of timer */
+        width: 500px;
+        height: 300px;
+        opacity: 0;
+    }
+    .content-icon-group {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        margin-bottom: 20px;
+        position: relative; /* For hand animation */
+    }
+    .content-icon {
+        width: 70px;
+        height: 70px;
+        border: 2px solid #ccc;
+        border-radius: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 30px; /* For emoji icons */
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        opacity: 0;
+        background-color: #f9f9f9;
+    }
+    .content-icon:hover { transform: scale(1.1); box-shadow: 0 0 10px rgba(0,0,0,0.2); }
+    .distracting-icon { background-color: #fdebd0; border-color: #f5b041; } /* Orange tint for distracting */
+    .chosen-icon { border-color: #2ecc71; box-shadow: 0 0 15px #2ecc71; transform: scale(1.15); }
+
+    #hand-icon-svg {
+        position: absolute;
+        width: 60px;
+        height: 60px;
+        opacity: 0;
+        z-index: 50;
+        transform: rotate(-45deg); /* Pointing finger */
+        pointer-events: none; /* So it doesn't block clicks on icons */
+    }
+
+    #chosen-items-display {
+        margin-top: 30px;
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+        opacity: 0;
+    }
+    .chosen-item {
+        text-align: center;
+        opacity: 0;
+    }
+    .chosen-item-icon { font-size: 40px; }
+    .chosen-item-text { font-size: 18px; color: #34495e; margin-top: 5px; }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div id="subtitle14" class="subtitle">建议：醒来后的前10分钟</div>
+    <div id="subtitle15" class="subtitle">只接收你主动选择的内容</div>
+    <div id="subtitle16" class="subtitle">比如一本书、一条理念、一个目标</div>
+
+    <div id="suggestion-scene">
+        <div id="suggestion-text-prefix">建议：</div>
+
+        <svg id="timer-svg" viewBox="0 0 150 150">
+            <circle cx="75" cy="75" r="70" fill="none" stroke="#bdc3c7" stroke-width="5"/>
+            <g id="timer-markings">
+                <circle cx="75" cy="15" r="5"/> <text x="75" y="38" id="timer-10min-text" opacity="0">10 min</text>
+                <!-- more markings if needed -->
+            </g>
+            <line id="timer-hand" x1="75" y1="75" x2="75" y2="20"/>
+        </svg>
+
+        <div id="content-choice-scene">
+            <div class="content-icon-group" id="icon-group-1">
+                <div class="content-icon distracting-icon" id="distract1">🌪️</div>
+                <div class="content-icon" id="choice1">💡</div> <!-- Idea -->
+                <div class="content-icon distracting-icon" id="distract2">📱</div>
+            </div>
+             <svg id="hand-icon-svg" viewBox="0 0 24 24"> <!-- Simple hand icon -->
+                <path fill="#3498db" d="M10.5,7C10.5,7 10.43,7.03 10.36,7.05C10.28,7.07 10.21,7.1 10.12,7.14L5.06,9.64C4.74,9.79 4.47,10.04 4.29,10.34C4.1,10.64 4,10.97 4,11.31V20A1,1 0 0,0 5,21H9A1,1 0 0,0 10,20V14H10.5C11.05,14 11.55,13.78 11.9,13.4L12.06,13.24L15.25,10.05C15.5,9.8 15.79,9.56 16.12,9.38L19,8C19.09,7.96 19.19,7.94 19.29,7.94C19.39,7.94 19.48,7.95 19.58,7.97C20.14,8.12 20.63,8.45 20.88,8.93C21.13,9.4 21.13,9.95 20.88,10.42L18.88,14.42C18.76,14.66 18.54,14.85 18.28,14.94L17.62,15.16C17.5,15.2 17.38,15.22 17.25,15.22C16.86,15.22 16.5,15.04 16.26,14.73L12.26,10.73L10.5,12.5V7Z" />
+            </svg>
+
+            <div id="chosen-items-display">
+                <div class="chosen-item" id="item-book">
+                    <div class="chosen-item-icon">📖</div>
+                    <div class="chosen-item-text">一本书</div>
+                </div>
+                <div class="chosen-item" id="item-idea">
+                    <div class="chosen-item-icon">💡</div>
+                    <div class="chosen-item-text">一条理念</div>
+                </div>
+                <div class="chosen-item" id="item-goal">
+                    <div class="chosen-item-icon">🎯</div>
+                    <div class="chosen-item-text">一个目标</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+<script>
+    const s14Start = 40000;
+    const s14Duration = 42666 - 40000; // 2666ms
+
+    const s15Start = 42800;
+    const s15Duration = 45400 - 42800; // 2600ms
+
+    const s16Start = 45600;
+    const s16Duration = 49266 - 45600; // 3666ms
+
+    const timeline = gsap.timeline();
+
+    const suggestionTextPrefix = document.getElementById('suggestion-text-prefix');
+    const timerSVG = document.getElementById('timer-svg');
+    const timerHand = document.getElementById('timer-hand');
+    const timer10MinText = document.getElementById('timer-10min-text');
+
+    const contentChoiceScene = document.getElementById('content-choice-scene');
+    const handIcon = document.getElementById('hand-icon-svg');
+    const choiceIcon = document.getElementById('choice1'); // The idea icon will be the chosen one
+    const distractingIcons = [document.getElementById('distract1'), document.getElementById('distract2')];
+    const allContentIcons = [...distractingIcons, choiceIcon];
+
+    const chosenItemsDisplay = document.getElementById('chosen-items-display');
+    const chosenItemBook = document.getElementById('item-book');
+    const chosenItemIdea = document.getElementById('item-idea');
+    const chosenItemGoal = document.getElementById('item-goal');
+
+
+    // Subtitle 14: 建议：醒来后的前10分钟
+    const s14Time = s14Start / 1000;
+    timeline.set("#subtitle14", { textContent: "建议：醒来后的", immediateRender: true }, s14Time);
+    timeline.to("#subtitle14", { opacity: 1, duration: 0.5, ease: "power2.out" }, s14Time);
+    timeline.to(suggestionTextPrefix, { opacity: 1, duration: 0.4 }, s14Time + 0.2);
+    // --- Timer Animation for 10 Minutes ---
+    timeline.to(timerSVG, { opacity: 1, scale: [0.5, 1], duration: 0.6, ease: "back.out(1.4)" }, s14Time + 0.5);
+    timeline.fromTo(timerHand, { rotation: 0 }, { rotation: 360, duration: 1, ease: "power1.inOut" }, s14Time + 0.8); // Hand spins
+    timeline.to(timer10MinText, { opacity: 1, duration: 0.3 }, s14Time + 1.5); // "10 min" text appears
+
+    timeline.to(["#subtitle14", suggestionTextPrefix, timerSVG], { opacity: 0, duration: 0.4, ease: "power2.in" }, (s14Start + s14Duration - 400) / 1000);
+
+    // Subtitle 15: 只接收你主动选择的内容
+    const s15Time = s15Start / 1000;
+    timeline.to("#subtitle15", { opacity: 1, duration: 0.5, ease: "power2.out" }, s15Time);
+    timeline.to(contentChoiceScene, { opacity: 1, duration: 0.3 }, s15Time + 0.2);
+
+    // --- Content Icons Appearance and Hand Selection ---
+    // Animate content icons appearing
+    allContentIcons.forEach((icon, index) => {
+        timeline.to(icon, { opacity: 1, y: [20, 0], duration: 0.3, ease: "power1.out" }, s15Time + 0.4 + index * 0.1);
+    });
+
+    // Hand appears and moves to the chosen icon
+    const choiceIconRect = choiceIcon.getBoundingClientRect();
+    const contentSceneRect = contentChoiceScene.getBoundingClientRect();
+    timeline.to(handIcon, {
+        opacity: 1,
+        duration: 0.3,
+        left: choiceIconRect.left - contentSceneRect.left - 10, // Position hand near the icon
+        top: choiceIconRect.top - contentSceneRect.top + choiceIconRect.height/2 - handIcon.height/2 + 15,
+    }, s15Time + 1.0);
+
+    // Animate hand "tapping" and icon selection
+    timeline.to(handIcon, { scale: 0.8, duration: 0.2, repeat: 1, yoyo: true }, s15Time + 1.3);
+    timeline.call(() => {
+        choiceIcon.classList.add('chosen-icon');
+        distractingIcons.forEach(icon => {
+            gsap.to(icon, { opacity: 0.3, scale: 0.8, filter:"blur(2px)", duration: 0.3 });
+        });
+    }, null, s15Time + 1.4);
+
+
+    timeline.to(["#subtitle15", handIcon], { opacity: 0, duration: 0.3, ease: "power2.in" }, (s15Start + s15Duration - 300) / 1000);
+    // Keep chosen icon and faded distracting icons for next scene continuity before they also fade.
+
+    // Subtitle 16: 比如一本书、一条理念、一个目标
+    const s16Time = s16Start / 1000;
+    timeline.set("#subtitle16", { textContent: "比如：", immediateRender: true }, s16Time);
+    timeline.to("#subtitle16", { opacity: 1, duration: 0.5, ease: "power2.out" }, s16Time);
+
+    // Fade out the initial choice icons (distracting ones fully, chosen one will be replaced by specific example)
+    timeline.to(allContentIcons, { opacity: 0, duration: 0.3 }, s16Time + 0.2);
+
+    // --- Display Specific Chosen Items (Book, Idea, Goal) ---
+    timeline.to(chosenItemsDisplay, { opacity: 1, duration: 0.1 }, s16Time + 0.5);
+    timeline.fromTo(chosenItemBook, {opacity:0, y:20}, { opacity: 1, y:0, duration: 0.4, ease: "back.out(1.5)" }, s16Time + 0.6);
+    timeline.fromTo(chosenItemIdea, {opacity:0, y:20}, { opacity: 1, y:0, duration: 0.4, ease: "back.out(1.5)" }, s16Time + 0.8); // Idea icon matches the 'chosen' one
+    timeline.fromTo(chosenItemGoal, {opacity:0, y:20}, { opacity: 1, y:0, duration: 0.4, ease: "back.out(1.5)" }, s16Time + 1.0);
+
+    // End of part - fade out
+    const s16EndTime = (s16Start + s16Duration) / 1000;
+    timeline.to(["#subtitle16", chosenItemsDisplay, contentChoiceScene], { // contentChoiceScene to ensure all its children also fade if any were missed
+        opacity: 0,
+        duration: 0.5,
+        ease: "power2.in"
+    }, s16EndTime - 0.5);
+
+    // Reset states if needed for looping/replaying (optional)
+    timeline.call(() => {
+        choiceIcon.classList.remove('chosen-icon');
+        distractingIcons.forEach(icon => icon.style.cssText = ""); // Clear inline styles
+    }, null, s16EndTime);
+
+    // timeline.play(); // For testing
+</script>
+</body>
+</html>

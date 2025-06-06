@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>字幕动画 - Part 10 (Valve 3 Action)</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        background-color: #1c2833; /* Very dark blue, night time */
+        overflow: hidden;
+    }
+    .container {
+        width: 800px;
+        height: 450px;
+        position: relative;
+        background-color: #283747; /* Darker shade for container */
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        border: 1px solid #17202a;
+        overflow: hidden;
+    }
+    .subtitle {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 26px;
+        color: #d5dbdb; /* Light grey text */
+        padding: 10px 20px;
+        background-color: rgba(23, 32, 42, 0.85);
+        border-radius: 5px;
+        opacity: 0;
+        text-align: center;
+        z-index: 100;
+    }
+
+    /* Scene Elements */
+    #night-time-scene {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        opacity: 1;
+    }
+    #moon-icon-svg {
+        position: absolute;
+        top: 30px;
+        left: 30px;
+        width: 80px;
+        height: 80px;
+        opacity: 0;
+        filter: drop-shadow(0 0 10px #f7dc6f);
+    }
+    #timer-display-text { /* For "5 min" */
+        position: absolute;
+        top: 60px;
+        left: 120px;
+        font-size: 30px;
+        font-weight: bold;
+        color: #f7dc6f; /* Moon yellow */
+        opacity: 0;
+    }
+
+    #info-sorting-area {
+        position: absolute;
+        width: 700px; /* Area for sorting */
+        height: 300px;
+        top: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        opacity: 0;
+        /* border: 1px dashed #566573; */ /* For debugging layout */
+    }
+    .info-item-p10 {
+        position: absolute; /* Will be positioned by JS */
+        width: 50px;
+        height: 30px;
+        border-radius: 5px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 12px;
+        color: #2c3e50;
+        box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        opacity: 0;
+    }
+    .keep-item { background-color: #a9dfbf; /* Light green for keep */ border: 1px solid #58d68d; }
+    .delete-item { background-color: #fadbd8; /* Light red for delete */ border: 1px solid #f1948a; }
+
+    .pile-label {
+        position: absolute;
+        bottom: 10px; /* Inside sorting area */
+        font-size: 24px;
+        font-weight: bold;
+        opacity: 0;
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
+    #keep-pile-label {
+        left: 100px; /* Position for keep pile */
+        color: #239b56;
+        background-color: rgba(169, 223, 191, 0.7);
+    }
+    #delete-pile-label {
+        right: 100px; /* Position for delete pile */
+        color: #cb4335;
+        background-color: rgba(250, 219, 216, 0.7);
+    }
+     #trash-bin-svg {
+        position: absolute;
+        bottom: 45px; /* Near delete pile label */
+        right: 95px;
+        width: 40px;
+        height: 40px;
+        opacity: 0;
+        z-index: 5;
+    }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div id="subtitle28" class="subtitle">临睡前5分钟</div>
+    <div id="subtitle29" class="subtitle">在脑中对今天的信息流“排个序”：</div>
+    <div id="subtitle30" class="subtitle">什么值得记，什么该删</div>
+
+    <div id="night-time-scene">
+        <svg id="moon-icon-svg" viewBox="0 0 100 100">
+            <path d="M50 90 A40 40 0 1 1 50 10 A30 30 0 1 0 50 90 Z" fill="#f7dc6f"/>
+        </svg>
+        <div id="timer-display-text">5 MIN</div>
+
+        <div id="info-sorting-area">
+            <!-- Info items will be added here by JS -->
+            <div id="keep-pile-label">记</div>
+            <div id="delete-pile-label">删</div>
+            <svg id="trash-bin-svg" viewBox="0 0 24 24">
+                <path fill="#cb4335" d="M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19M8,9H16V19H8V9M15.5,4L14.5,3H9.5L8.5,4H5V6H19V4H15.5Z" />
+            </svg>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+<script>
+    const s28Start = 80566; // 01:20,566
+    const s28Duration = 82166 - 80566; // 1600ms
+
+    const s29Start = 82200; // 01:22,200
+    const s29Duration = 86000 - 82200; // 3800ms
+
+    const s30Start = 86233; // 01:26,233
+    const s30Duration = 88866 - 86233; // 2633ms
+
+    const timeline = gsap.timeline();
+
+    const moonIcon = document.getElementById('moon-icon-svg');
+    const timerDisplayText = document.getElementById('timer-display-text');
+    const infoSortingArea = document.getElementById('info-sorting-area');
+    const keepPileLabel = document.getElementById('keep-pile-label');
+    const deletePileLabel = document.getElementById('delete-pile-label');
+    const trashBinIcon = document.getElementById('trash-bin-svg');
+
+    const numInfoItems = 15;
+    const infoItemData = [];
+
+    // --- Setting the "5 Minute" Pre-Sleep Timer ---
+    // Subtitle 28: 临睡前5分钟
+    const s28Time = s28Start / 1000;
+    timeline.set("#subtitle28", { textContent: "临睡前", immediateRender: true }, s28Time);
+    // Subtitle text will appear, "5分钟" is handled by timerDisplayText
+    timeline.to("#subtitle28", { opacity: 1, duration: 0.5, ease: "power2.out" }, s28Time);
+    timeline.to(moonIcon, { opacity: 1, scale: [0.5,1], duration: 0.6, ease: "back.out(1.5)" }, s28Time + 0.2);
+    timeline.fromTo(timerDisplayText, {opacity:0, y:10}, { opacity: 1, y:0, duration: 0.4, ease: "power1.out" }, s28Time + 0.5);
+
+    timeline.to(["#subtitle28", moonIcon, timerDisplayText], { opacity: 0, duration: 0.4, ease: "power2.in" }, (s28Start + s28Duration - 400) / 1000);
+
+    // --- Generating and Displaying Jumbled Information Items ---
+    // Subtitle 29: 在脑中对今天的信息流“排个序”：
+    const s29Time = s29Start / 1000;
+    timeline.to("#subtitle29", { opacity: 1, duration: 0.5, ease: "power2.out" }, s29Time);
+    timeline.to(infoSortingArea, { opacity: 1, duration: 0.2 }, s29Time + 0.1);
+    timeline.call(generateInfoItems, [numInfoItems], s29Time + 0.2); // Generate jumbled items
+
+    // --- Animating Items Sorting into "Keep" and "Delete" Piles ---
+    // Animate items sorting
+    timeline.call(() => {
+        infoItemData.forEach((item, index) => {
+            let targetX, targetY;
+            const pileAreaWidth = infoSortingArea.offsetWidth / 2 - 80; // Width of each pile area
+            const pileAreaHeight = infoSortingArea.offsetHeight - 80; // Height for items
+
+            if (item.keep) {
+                targetX = anime.random(30, pileAreaWidth); // Left pile
+            } else {
+                targetX = infoSortingArea.offsetWidth / 2 + anime.random(30, pileAreaWidth); // Right pile
+            }
+            targetY = anime.random(20, pileAreaHeight);
+
+            gsap.to(item.element, {
+                left: targetX,
+                top: targetY,
+                rotation: 0, // Straighten them up
+                scale: item.keep ? 1 : 0.9, // Delete items might be slightly smaller
+                opacity: item.keep ? 1 : 0.7,
+                duration: 0.8,
+                delay: 0.5 + index * 0.05, // Staggered sort after initial appearance
+                ease: "power2.inOut"
+            });
+        });
+    }, null, s29Time + 0.8); // Start sorting after items appear
+
+    timeline.to(["#subtitle29"], { opacity: 0, duration: 0.3, ease: "power2.in" }, (s29Start + s29Duration - 300) / 1000);
+    // Sorted items remain for next subtitle
+
+    // --- Displaying "Keep" (记) and "Delete" (删) Labels and Trash Bin ---
+    // Subtitle 30: 什么值得记，什么该删
+    const s30Time = s30Start / 1000;
+    timeline.set("#subtitle30", { textContent: "分类结果：", immediateRender: true }, s30Time);
+    // Subtitle text, but "记" and "删" are handled by labels
+    timeline.to("#subtitle30", { opacity: 1, duration: 0.5, ease: "power2.out" }, s30Time);
+    timeline.to(keepPileLabel, { opacity: 1, scale: [0.7, 1], duration: 0.4, ease: "back.out(1.5)" }, s30Time + 0.3);
+    timeline.to(deletePileLabel, { opacity: 1, scale: [0.7, 1], duration: 0.4, ease: "back.out(1.5)" }, s30Time + 0.4);
+    timeline.to(trashBinIcon, { opacity: 1, scale: [0.5,1], duration: 0.4, ease: "elastic.out(1,0.7)"}, s30Time + 0.5);
+
+    timeline.call(() => {
+        infoItemData.forEach(item => {
+            if (item.keep && item.element.parentNode) { // Check if element still in DOM
+                gsap.to(item.element, {
+                    scale: 1.05, // Slightly larger
+                    boxShadow: "0 0 8px #239b56", // Green glow
+                    duration: 0.3,
+                    yoyo: true,
+                    repeat: 1,
+                    ease: "power1.inOut"
+                });
+            }
+        });
+    }, null, s30Time + 0.5); // After keep label appears
+
+    // --- Animating "Delete" Items Moving to Trash ---
+    // Animate deleted items going to trash
+    timeline.call(() => {
+        infoItemData.forEach(item => {
+            if (!item.keep) {
+                gsap.to(item.element, {
+                    left: trashBinIcon.offsetLeft + anime.random(-5, 5),
+                    top: trashBinIcon.offsetTop + anime.random(-5, 5),
+                    opacity: 0,
+                    scale: 0.3,
+                    duration: 0.5,
+                    delay: 0.2 + Math.random() * 0.3,
+                    ease: "power1.in"
+                });
+            }
+        });
+    }, null, s30Time + 1.0);
+
+
+    // End of part
+    const s30EndTime = (s30Start + s30Duration) / 1000;
+    timeline.to(["#subtitle30", keepPileLabel, deletePileLabel, trashBinIcon], {
+        opacity: 0,
+        duration: 0.5,
+        ease: "power2.in"
+    }, s30EndTime - 0.5);
+    timeline.to(infoSortingArea, { // Fade out remaining keep items
+        opacity: 0,
+        duration: 0.5,
+        onComplete: () => infoSortingArea.innerHTML = '' // Clear all items and labels
+    }, s30EndTime - 0.3);
+
+
+    function generateInfoItems(count) {
+        infoSortingArea.innerHTML = ''; // Clear previous, then re-add static labels
+        infoSortingArea.appendChild(keepPileLabel);
+        infoSortingArea.appendChild(deletePileLabel);
+        infoSortingArea.appendChild(trashBinIcon);
+        gsap.set([keepPileLabel, deletePileLabel, trashBinIcon], {opacity:0}); // Hide labels until their turn
+
+
+        infoItemData.length = 0; // Clear array
+        const areaWidth = infoSortingArea.offsetWidth;
+        const areaHeight = infoSortingArea.offsetHeight;
+
+        for (let i = 0; i < count; i++) {
+            const item = document.createElement('div');
+            item.classList.add('info-item-p10');
+            const shouldKeep = Math.random() > 0.4; // 60% chance to keep
+            item.textContent = `Info ${i+1}`;
+            if (shouldKeep) {
+                item.classList.add('keep-item');
+            } else {
+                item.classList.add('delete-item');
+            }
+
+            // Initial jumbled position and rotation for a scattered look
+            const initialX = Math.random() * (areaWidth - 60) + 5;
+            const initialY = Math.random() * (areaHeight - 40) + 5;
+            const initialRotation = anime.random(-25, 25);
+
+            item.style.left = initialX + 'px';
+            item.style.top = initialY + 'px';
+            item.style.transform = `rotate(${initialRotation}deg)`;
+
+            infoSortingArea.appendChild(item);
+            infoItemData.push({ element: item, keep: shouldKeep });
+
+            gsap.to(item, { opacity: 1, scale: [0.3, 1], duration: 0.5, delay: i * 0.03, ease: "back.out(1.7)" });
+        }
+    }
+    // timeline.play(); // For testing
+</script>
+</body>
+</html>

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>字幕动画 - Part 5 (Valve 1)</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        background-color: #e8f6f3; /* Light, fresh green background */
+        overflow: hidden;
+    }
+    .container {
+        width: 800px;
+        height: 450px;
+        position: relative;
+        background-color: #fdfefe; /* Clean white canvas */
+        box-shadow: 0 0 20px rgba(0,0,0,0.05);
+        border: 1px solid #d0ece7;
+        overflow: hidden;
+        transition: background-color 1s ease-in-out; /* For cognitive tone change */
+    }
+    .subtitle {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 26px;
+        color: #145a32; /* Dark green text */
+        padding: 10px 20px;
+        background-color: rgba(232, 246, 243, 0.85); /* Light green translucent bg */
+        border-radius: 5px;
+        opacity: 0;
+        text-align: center;
+        z-index: 100;
+    }
+
+    /* Scene Elements */
+    #valve1-icon-display-svg {
+        position: absolute;
+        top: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 80px;
+        opacity: 0;
+        z-index: 10;
+    }
+    #valve1-icon-display-svg .valve-body { fill: #2980b9; }
+    #valve1-icon-display-svg .valve-cross { fill: #ecf0f1; transform-origin: center; }
+
+    #eye-and-phone-scene {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+    }
+    #eye-svg {
+        width: 150px;
+        height: 100px;
+        opacity: 0;
+        position: absolute;
+        top: 100px;
+        left: 150px;
+    }
+    #eyelid { transform-origin: center; }
+    #phone-svg {
+        width: 80px;
+        height: 150px;
+        opacity: 0;
+        position: absolute;
+        top: 120px;
+        left: 300px; /* To the right of the eye */
+    }
+    .phone-screen-content { fill: #bdc3c7; }
+    .chaotic-line { stroke: #7f8c8d; stroke-width: 2; }
+
+    #filter-sieve-svg {
+        position: absolute;
+        top: 150px;
+        left: 420px; /* Between phone and where clean info goes */
+        width: 100px;
+        height: 100px;
+        opacity: 0;
+        z-index: 20;
+    }
+    .sieve-line { stroke: #34495e; stroke-width: 3; stroke-linecap:round; }
+
+    #clean-info-particle {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        background-color: #2ecc71; /* Bright green for good info */
+        border-radius: 50%;
+        opacity: 0;
+        box-shadow: 0 0 15px #2ecc71;
+        z-index: 25;
+        top: 185px; /* Aligned with filter output */
+        left: 550px; /* Starts after filter */
+    }
+    .chaotic-particle {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background-color: #e74c3c; /* Red for bad info */
+        border-radius: 3px;
+        opacity: 0;
+        z-index: 15;
+    }
+
+</style>
+</head>
+<body>
+
+<div class="container" id="mainContainer">
+    <div id="subtitle10" class="subtitle">第一个阀门：开局过滤法</div>
+    <div id="subtitle11" class="subtitle">别一睁眼就刷手机</div>
+    <div id="subtitle12" class="subtitle">你的第一口信息</div>
+    <div id="subtitle13" class="subtitle">决定一天的认知基调</div>
+
+    <!-- Valve 1 Icon (can be similar to Part 4's icons) -->
+    <svg id="valve1-icon-display-svg" viewBox="0 0 100 100">
+        <circle class="valve-body" cx="50" cy="50" r="40" stroke="#2c3e50" stroke-width="5"/>
+        <rect class="valve-cross" x="45" y="20" width="10" height="60"/>
+        <rect class="valve-cross" x="20" y="45" width="60" height="10" id="valve1-crossbar-display"/>
+    </svg>
+
+    <div id="eye-and-phone-scene">
+        <!-- Eye SVG -->
+        <svg id="eye-svg" viewBox="0 0 100 60">
+            <ellipse cx="50" cy="30" rx="48" ry="28" fill="#fff" stroke="#000" stroke-width="2"/>
+            <circle cx="50" cy="30" r="15" fill="#3498db"/> <!-- Iris -->
+            <circle cx="50" cy="30" r="7" fill="#000"/> <!-- Pupil -->
+            <path id="eyelid" d="M2,30 Q50,0 98,30" fill="#f3d5b5" stroke="#000" stroke-width="1.5" /> <!-- Upper eyelid -->
+        </svg>
+
+        <!-- Phone SVG -->
+        <svg id="phone-svg" viewBox="0 0 80 150">
+            <rect x="5" y="5" width="70" height="140" rx="10" ry="10" fill="#34495e" stroke="#000" stroke-width="2"/>
+            <rect x="10" y="15" width="60" height="100" class="phone-screen-content"/>
+            <!-- Chaotic lines on phone screen -->
+            <line class="chaotic-line phone-feed" x1="15" y1="20" x2="65" y2="50"/>
+            <line class="chaotic-line phone-feed" x1="15" y1="40" x2="65" y2="25"/>
+            <line class="chaotic-line phone-feed" x1="15" y1="60" x2="65" y2="80"/>
+            <line class="chaotic-line phone-feed" x1="65" y1="60" x2="15" y2="90"/>
+        </svg>
+
+        <!-- Filter/Sieve SVG -->
+        <svg id="filter-sieve-svg" viewBox="0 0 100 100">
+            <line class="sieve-line" x1="10" y1="10" x2="90" y2="10"/>
+            <line class="sieve-line" x1="10" y1="30" x2="90" y2="30"/>
+            <line class="sieve-line" x1="10" y1="50" x2="90" y2="50"/>
+            <line class="sieve-line" x1="10" y1="70" x2="90" y2="70"/>
+            <line class="sieve-line" x1="10" y1="90" x2="90" y2="90"/>
+        </svg>
+    </div>
+    <div id="clean-info-particle"></div>
+    <!-- Container for chaotic particles -->
+    <div id="chaotic-particles-container" style="position:absolute; width:100%; height:100%; top:0; left:0; z-index:15;"></div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+<script>
+    const s10Start = 30166;
+    const s10Duration = 32966 - 30166; // 2800ms
+
+    const s11Start = 33033;
+    const s11Duration = 35166 - 33033; // 2133ms
+
+    const s12Start = 35300;
+    const s12Duration = 36733 - 35300; // 1433ms
+
+    const s13Start = 36733;
+    const s13Duration = 39266 - 36733; // 2533ms
+
+    const timeline = gsap.timeline();
+    const mainContainer = document.getElementById('mainContainer');
+
+    const valveIconDisplay = document.getElementById('valve1-icon-display-svg');
+    const valveIconCrossbar = document.getElementById('valve1-crossbar-display');
+    const eyeAndPhoneScene = document.getElementById('eye-and-phone-scene');
+    const eyeSVG = document.getElementById('eye-svg');
+    const eyelid = document.getElementById('eyelid');
+    const phoneSVG = document.getElementById('phone-svg');
+    const phoneFeedLines = document.querySelectorAll('.phone-feed');
+    const filterSieve = document.getElementById('filter-sieve-svg');
+    const cleanInfoParticle = document.getElementById('clean-info-particle');
+
+    // --- Valve 1 Icon Display ---
+    // Subtitle 10: 第一阀门：开局过滤法
+    const s10Time = s10Start / 1000;
+    timeline.to("#subtitle10", { opacity: 1, duration: 0.5, ease: "power2.out" }, s10Time);
+    timeline.to(valveIconDisplay, { opacity: 1, scale: [0.5, 1], duration: 0.7, ease: "elastic.out(1, 0.6)" }, s10Time + 0.2);
+    timeline.to(valveIconCrossbar, { rotation: 90, svgOrigin: "50 50", duration: 0.5, ease: "power1.inOut" }, s10Time + 0.5); // Show valve closed
+
+    timeline.to(["#subtitle10", valveIconDisplay], { opacity: 0, duration: 0.3, ease: "power2.in" }, (s10Start + s10Duration - 300) / 1000);
+
+    // --- Eye Opens & Phone Interaction with Filter ---
+    // Subtitle 11: 别一睁眼就刷手机
+    const s11Time = s11Start / 1000;
+    timeline.to(eyeAndPhoneScene, { opacity: 1, duration: 0.1 }, s11Time);
+    timeline.to("#subtitle11", { opacity: 1, duration: 0.5, ease: "power2.out" }, s11Time);
+
+    timeline.to(eyeSVG, { opacity: 1 }, s11Time + 0.2);
+    timeline.to(eyelid, { attr: { d: "M2,30 Q50,50 98,30" }, duration: 0.1 }, s11Time + 0.2); // Slightly close
+    timeline.to(eyelid, { attr: { d: "M2,30 Q50,0 98,30" }, duration: 0.4, ease: "back.out(2)" }, s11Time + 0.3); // Eye opens wide
+
+    timeline.fromTo(phoneSVG, { opacity:0, x: 50 }, { opacity: 1, x:0, duration: 0.5, ease: "power1.out" }, s11Time + 0.5);
+    // Animate phone feed lines for chaotic effect
+    timeline.add(anime({
+        targets: phoneFeedLines,
+        strokeDashoffset: [anime.setDashoffset, 0],
+        easing: 'easeInOutSine',
+        duration: 300,
+        delay: anime.stagger(100, {start: (s11Time + 0.8)*1000}),
+        loop: 3,
+        direction: 'alternate'
+    }).play, s11Time + 0.8);
+
+    timeline.to(filterSieve, { opacity: 1, scale: [0.7, 1], duration: 0.4, ease: "back.out(1.7)" }, s11Time + 1.2);
+
+    // Spawn chaotic particles that get blocked by the filter
+    timeline.call(() => spawnChaoticParticles(phoneSVG, filterSieve, 10), null, s11Time + 1.5);
+
+    timeline.to("#subtitle11", { opacity: 0, duration: 0.3, ease: "power2.in" }, (s11Start + s11Duration - 300) / 1000);
+
+
+    // --- Clean Information Passes Filter ---
+    // Subtitle 12: 你的第一口信息
+    const s12Time = s12Start / 1000;
+    timeline.to("#subtitle12", { opacity: 1, duration: 0.5, ease: "power2.out" }, s12Time);
+    // Clean info particle appears and moves through filter
+    timeline.fromTo(cleanInfoParticle,
+        { opacity: 0, x: -30, y: 0, scale: 0.5, left: filterSieve.getBoundingClientRect().left - mainContainer.getBoundingClientRect().left + 20}, // Start before filter
+        { opacity: 1, x: 0, y: 0, scale: 1, duration: 0.5, ease: "power1.out" }, s12Time + 0.3); // Appears at filter
+    timeline.to(cleanInfoParticle, {
+        x: 100, // Moves past filter
+        duration: 0.8,
+        ease: "circ.out"
+    }, s12Time + 0.8);
+
+    timeline.to("#subtitle12", { opacity: 0, duration: 0.3, ease: "power2.in" }, (s12Start + s12Duration - 300) / 1000);
+
+    // --- Cognitive Tone Sets for the Day ---
+    // Subtitle 13: 决定一天的认知基调
+    const s13Time = s13Start / 1000;
+    timeline.to("#subtitle13", { opacity: 1, duration: 0.5, ease: "power2.out" }, s13Time);
+
+    // Clean info particle lands and changes background
+    timeline.to(cleanInfoParticle, {
+        x: 150, // Moves to a final position
+        y: 50,
+        scale: 1.5,
+        opacity: 0.5,
+        duration: 1.0,
+        ease: "power1.out",
+        onComplete: () => {
+            mainContainer.style.backgroundColor = '#d6eaf8'; // Calm blue
+        }
+    }, s13Time + 0.2);
+    timeline.to(cleanInfoParticle, { opacity: 0, duration: 0.5 }, s13Time + 1.2); // Particle fades
+
+    // Fade out scene elements for end of s13
+    const s13EndTime = (s13Start + s13Duration) / 1000;
+    timeline.to(["#subtitle13", eyeSVG, phoneSVG, filterSieve], {
+        opacity: 0,
+        duration: 0.5,
+        ease: "power2.in"
+    }, s13EndTime - 0.5);
+    timeline.to(eyeAndPhoneScene, { opacity: 0, duration: 0.1 }, s13EndTime);
+    timeline.call(() => { // Reset background for potential next part
+         setTimeout(() => mainContainer.style.backgroundColor = '#fdfefe', 500);
+    }, null, s13EndTime);
+
+
+    function spawnChaoticParticles(sourceEl, targetEl, count) {
+        const chaoticParticlesContainer = document.getElementById('chaotic-particles-container');
+        const containerRect = mainContainer.getBoundingClientRect();
+        const sourceRect = sourceEl.getBoundingClientRect();
+        const targetRect = targetEl.getBoundingClientRect();
+
+        for (let i = 0; i < count; i++) {
+            const particle = document.createElement('div');
+            particle.classList.add('chaotic-particle');
+
+            const startX = sourceRect.left - containerRect.left + sourceRect.width / 2 + anime.random(-10, 10);
+            const startY = sourceRect.top - containerRect.top + sourceRect.height / 2 + anime.random(-20, 20);
+            particle.style.left = startX + 'px';
+            particle.style.top = startY + 'px';
+            chaoticParticlesContainer.appendChild(particle);
+
+            const flightDuration = anime.random(400, 700);
+            anime({
+                targets: particle,
+                translateX: targetRect.left - sourceRect.left + anime.random(0, targetRect.width) - (sourceRect.width/2),
+                translateY: targetRect.top - sourceRect.top + anime.random(0, targetRect.height) - (sourceRect.height/2),
+                scale: [
+                    { value: 1, duration: flightDuration - 50 },
+                    { value: 1.2, duration: 50 },
+                    { value: 0, duration: 100 }
+                ],
+                opacity: [
+                    { value: 0.8, duration: flightDuration },
+                    { value: 0, duration: 100 }
+                ],
+                duration: flightDuration + 100, // Total duration for the particle's animation
+                easing: 'easeOutExpo', // Applied to translateX and translateY
+                delay: anime.random(0, 200),
+                complete: () => {
+                    if (particle.parentNode) particle.parentNode.removeChild(particle);
+                }
+            });
+        }
+    }
+
+    // timeline.play(); // For testing
+</script>
+</body>
+</html>

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>字幕动画 - Part 9 (Valve 3)</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        background-color: #2c3e50; /* Dark blue for evening/night */
+        overflow: hidden;
+    }
+    .container {
+        width: 800px;
+        height: 450px;
+        position: relative;
+        background-color: #34495e; /* Slightly lighter dark blue */
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        border: 1px solid #212f3c;
+        overflow: hidden;
+    }
+    .subtitle {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 26px;
+        color: #ecf0f1; /* Light text for dark bg */
+        padding: 10px 20px;
+        background-color: rgba(44, 62, 80, 0.85);
+        border-radius: 5px;
+        opacity: 0;
+        text-align: center;
+        z-index: 100;
+    }
+
+    /* Scene Elements */
+    #valve3-icon-display-svg {
+        position: absolute;
+        top: 30px;
+        left: 30px;
+        width: 70px;
+        height: 70px;
+        opacity: 0;
+        z-index: 10;
+    }
+    /* Purple for this valve */
+    #valve3-icon-display-svg .valve-body { fill: #8e44ad; }
+    #valve3-icon-display-svg .valve-cross { fill: #ecf0f1; transform-origin: center; }
+
+    #soap-icon-text { /* For 🧼 and text */
+        position: absolute;
+        top: 40px;
+        left: 110px;
+        font-size: 40px; /* For emoji */
+        opacity: 0;
+        color: #fff;
+    }
+     #soap-icon-text span { font-size: 22px; vertical-align: middle; margin-left: 10px;}
+
+    #info-residue-scene {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap; /* Allow items to wrap */
+        padding: 50px;
+        box-sizing: border-box;
+        opacity: 0;
+        z-index: 5;
+    }
+    .residue-item {
+        padding: 5px 10px;
+        border-radius: 5px;
+        background-color: rgba(236, 240, 241, 0.3); /* Semi-transparent light */
+        color: #bdc3c7;
+        font-size: 14px;
+        margin: 5px;
+        opacity: 0; /* Start hidden, will be animated in */
+        box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    }
+    #residue-label { /* For "信息残留" text */
+        position: absolute;
+        bottom: 100px; /* Positioned above subtitles */
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 28px;
+        font-weight: bold;
+        color: #e74c3c; /* Warning color for residue */
+        opacity: 0;
+        z-index: 10;
+        background-color: rgba(44, 62, 80, 0.7);
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
+
+    #cleaning-effect-svg { /* For wave or sweep */
+        position: absolute;
+        bottom: 0;
+        left: -100%; /* Start off-screen */
+        width: 100%;
+        height: 200px; /* Height of the wave */
+        opacity: 0;
+        z-index: 15;
+    }
+    #cleaning-wave-path {
+        fill: rgba(133, 193, 233, 0.6); /* Light blue cleaning wave */
+    }
+
+    #tranquil-scene {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        background-color: #212f3c; /* Even darker, very calm blue */
+        opacity: 0;
+        z-index: 1; /* Below other elements that fade out */
+    }
+    .star {
+        position: absolute;
+        width: 3px;
+        height: 3px;
+        background-color: #fdfefe;
+        border-radius: 50%;
+        opacity: 0;
+        box-shadow: 0 0 5px #fff;
+    }
+    #tranquil-text { /* For "安静" */
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 60px;
+        font-weight: bold;
+        color: #aed6f1; /* Soft light blue */
+        opacity: 0;
+        z-index: 2;
+    }
+
+</style>
+</head>
+<body>
+
+<div class="container" id="mainContainerP9">
+    <div id="subtitle25" class="subtitle">🧼第三个阀门：睡前清理池</div>
+    <div id="subtitle26" class="subtitle">不是看完信息才安心</div>
+    <div id="subtitle27" class="subtitle">而是清完“信息残留”才真的安静</div>
+
+    <div id="tranquil-scene"> <!-- Background for final state -->
+        <div id="tranquil-text">安静</div>
+    </div>
+
+    <svg id="valve3-icon-display-svg" viewBox="0 0 100 100">
+        <circle class="valve-body" cx="50" cy="50" r="40" stroke="#633974" stroke-width="5"/>
+        <rect class="valve-cross" x="45" y="20" width="10" height="60"/>
+        <rect class="valve-cross" x="20" y="45" width="60" height="10" id="valve3-crossbar-display"/>
+    </svg>
+    <div id="soap-icon-text">🧼<span>睡前清理池</span></div>
+
+    <div id="info-residue-scene">
+        <!-- Residue items will be added by JS -->
+    </div>
+    <div id="residue-label">信息残留</div>
+
+    <svg id="cleaning-effect-svg" viewBox="0 0 800 200" preserveAspectRatio="none">
+        <path id="cleaning-wave-path" d="M0,100 Q200,50 400,100 T800,100 V200 H0 Z" />
+    </svg>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+<script>
+    const s25Start = 70966; // 01:10,966
+    const s25Duration = 74033 - 70966; // 3067ms
+
+    const s26Start = 74033; // 01:14,033
+    const s26Duration = 76333 - 74033; // 2300ms
+
+    const s27Start = 76433; // 01:16,433
+    const s27Duration = 80400 - 76433; // 3967ms
+
+    const timeline = gsap.timeline();
+    const container = document.getElementById('mainContainerP9');
+
+    const valve3Icon = document.getElementById('valve3-icon-display-svg');
+    const valve3Crossbar = document.getElementById('valve3-crossbar-display');
+    const soapIconText = document.getElementById('soap-icon-text');
+
+    const infoResidueScene = document.getElementById('info-residue-scene');
+    const residueLabel = document.getElementById('residue-label');
+    const cleaningEffectSVG = document.getElementById('cleaning-effect-svg');
+    const tranquilScene = document.getElementById('tranquil-scene');
+    const tranquilText = document.getElementById('tranquil-text');
+
+    const residueExamples = ["邮件", "新闻标题", "未读消息", "工作提醒", "社交动态", "广告", "视频片段", "待办事项", "想法A", "烦恼B"];
+
+    // --- Valve 3 Icon & Soap/Pool Intro ---
+    // Subtitle 25: 🧼第三个阀门：睡前清理池
+    const s25Time = s25Start / 1000;
+    timeline.set("#subtitle25", { textContent: "🧼第三个阀门：", immediateRender: true }, s25Time);
+    timeline.to("#subtitle25", { opacity: 1, duration: 0.5, ease: "power2.out" }, s25Time);
+    timeline.to(valve3Icon, { opacity: 1, scale: [0.5, 1], duration: 0.6, ease: "elastic.out(1, 0.5)" }, s25Time + 0.2);
+    timeline.to(valve3Crossbar, { rotation: 90, svgOrigin: "50 50", duration: 0.5, ease: "power1.inOut" }, s25Time + 0.4);
+    timeline.to(soapIconText, { opacity: 1, x: [-20, 0], duration: 0.5, ease: "power1.out" }, s25Time + 0.6);
+
+    timeline.to(["#subtitle25", valve3Icon, soapIconText], { opacity: 0, duration: 0.4, ease: "power2.in" }, (s25Start + s25Duration - 400) / 1000);
+
+    // --- Displaying Jumbled Information Residue ---
+    // Subtitle 26: 不是看完信息才安心 (Show jumbled residue)
+    const s26Time = s26Start / 1000;
+    timeline.to("#subtitle26", { opacity: 1, duration: 0.5, ease: "power2.out" }, s26Time);
+    timeline.to(infoResidueScene, { opacity: 1, duration: 0.2 }, s26Time + 0.1);
+    timeline.call(() => { // Spawn residue items
+        infoResidueScene.innerHTML = ''; // Clear first
+        residueExamples.forEach((text, index) => {
+            const item = document.createElement('div');
+            item.classList.add('residue-item');
+            item.textContent = text;
+            infoResidueScene.appendChild(item);
+            // Animate each residue item appearing with a slight scatter
+            gsap.fromTo(item,
+                { opacity: 0, scale: 0.5, x: anime.random(-50,50), y: anime.random(-30,30) },
+                { opacity: 1, scale: 1, x:0, y:0, duration: 0.4, delay: index * 0.05, ease: "back.out(1.2)" }
+            );
+        });
+    }, null, s26Time + 0.2);
+    timeline.to(residueLabel, { opacity: 1, y: [20,0], duration: 0.4, ease: "power1.out" }, s26Time + 0.5); // "信息残留" text
+
+    timeline.to("#subtitle26", { opacity: 0, duration: 0.3, ease: "power2.in" }, (s26Start + s26Duration - 300) / 1000);
+    // Residue and label remain for next subtitle
+
+    // --- Cleaning Process: Wave Sweeps Residue ---
+    // Subtitle 27: 而是清完“信息残留”才真的安静
+    const s27Time = s27Start / 1000;
+    timeline.set("#subtitle27", { textContent: "而是清完...才真的...", immediateRender: true }, s27Time);
+    timeline.to("#subtitle27", { opacity: 1, duration: 0.5, ease: "power2.out" }, s27Time);
+
+    // Cleaning animation
+    timeline.to(residueLabel, { opacity: 0, y: -20, duration: 0.5, ease: "power1.in" }, s27Time + 0.3); // Residue label fades
+    timeline.to(cleaningEffectSVG, { opacity: 1, x: "0%", duration: 0.8, ease: "power2.out" }, s27Time + 0.5); // Wave starts
+    timeline.call(() => { // Residue items get "swept"
+        const items = infoResidueScene.querySelectorAll('.residue-item');
+        items.forEach((item, index) => {
+            gsap.to(item, {
+                opacity: 0,
+                x: "+=100", // Move right as if swept by wave from left
+                scale: 0.5,
+                duration: 0.6,
+                delay: index * 0.03 + 0.2, // Staggered fade after wave starts
+                ease: "power1.in"
+            });
+        });
+    }, null, s27Time + 0.6);
+    timeline.to(cleaningEffectSVG, { x: "100%", duration: 0.8, ease: "power2.in", delay: 0.5 }, s27Time + 0.8); // Wave finishes moving across
+    timeline.set(cleaningEffectSVG, { opacity: 0, x: "-100%" }); // Reset wave position
+
+    // --- Transition to Tranquil Night Scene ---
+    timeline.to(infoResidueScene, { opacity: 0, duration: 0.3, onComplete: () => infoResidueScene.innerHTML = '' }, s27Time + 1.5);
+    timeline.to(tranquilScene, { opacity: 1, duration: 1.0 }, s27Time + 1.5);
+    // Spawn stars for the tranquil scene
+    timeline.call(spawnStars, [15, tranquilScene], s27Time + 1.8);
+    timeline.fromTo(tranquilText, { opacity:0, scale:0.5 }, { opacity:1, scale:1, duration:1.0, ease:"back.out(1.4)"}, s27Time + 2.2); // "安静" text
+
+    // End of part
+    const s27EndTime = (s27Start + s27Duration) / 1000;
+    timeline.to(["#subtitle27", tranquilText], {
+        opacity: 0,
+        duration: 0.5,
+        ease: "power2.in"
+    }, s27EndTime - 0.5);
+    timeline.to(tranquilScene, { opacity: 0, duration: 0.5 }, s27EndTime - 0.2); // Fade out stars scene slightly later
+    timeline.call(() => { // Clear stars
+        const existingStars = tranquilScene.querySelectorAll('.star');
+        existingStars.forEach(s => s.remove());
+    }, null, s27EndTime);
+
+
+    function spawnStars(count, parentElement) {
+        for (let i = 0; i < count; i++) {
+            const star = document.createElement('div');
+            star.classList.add('star');
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            const size = Math.random() * 2 + 1;
+            star.style.width = size + 'px';
+            star.style.height = size + 'px';
+            parentElement.appendChild(star);
+            gsap.to(star, {
+                opacity: Math.random() * 0.5 + 0.3, // Varying opacity
+                duration: 1.0,
+                delay: Math.random() * 0.5,
+                yoyo: true,
+                repeat: -1, // Twinkle
+                ease: "linear"
+            });
+        }
+    }
+
+    // timeline.play(); // For testing
+</script>
+</body>
+</html>

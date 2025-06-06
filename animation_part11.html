@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>字幕动画 - Part 11 (Consequences)</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        background-color: #f4f6f7; /* Neutral, slightly cool background */
+        overflow: hidden;
+    }
+    .container {
+        width: 800px;
+        height: 450px;
+        position: relative;
+        background-color: #e5e8e8; /* Light grey canvas */
+        box-shadow: 0 0 20px rgba(0,0,0,0.05);
+        border: 1px solid #cfd8dc;
+        overflow: hidden;
+    }
+    .subtitle {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 26px;
+        color: #212f3c;
+        padding: 10px 20px;
+        background-color: rgba(207, 216, 220, 0.85);
+        border-radius: 5px;
+        opacity: 0;
+        text-align: center;
+        z-index: 100;
+    }
+
+    /* Scene Elements */
+    #organization-tech-scene {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+    }
+    .org-shape {
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        border-radius: 5px;
+        background-color: #5dade2; /* Blue shapes */
+        opacity: 0.8;
+    }
+    #hand-arranging-svg { /* Simple hand icon */
+        position: absolute;
+        width: 60px;
+        height: 60px;
+        opacity: 0;
+        z-index: 10;
+        transform: scaleX(-1); /* Flip if needed */
+    }
+     #hand-arranging-svg path { fill: #3498db; }
+
+
+    #basin-scene {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+    }
+    #basin-svg {
+        width: 300px;
+        height: 200px;
+        opacity: 1; /* Basin is always visible in its scene */
+    }
+    #basin-outline { fill: #bdc3c7; stroke: #7f8c8d; stroke-width: 3; }
+    #murky-water {
+        fill: #90a4ae; /* Dull, murky color */
+        opacity: 0;
+        transform-origin: bottom center;
+    }
+    .mold-spot {
+        fill: #2e7d32; /* Dark green for mold */
+        opacity: 0;
+        transform-origin: center;
+        transition: opacity 0.5s, transform 0.5s; /* For spreading effect */
+    }
+    .effect-text-overlay { /* For "发霉", "长菌" */
+        position: absolute;
+        font-size: 30px;
+        font-weight: bold;
+        color: #c0392b;
+        background-color: rgba(229, 232, 232, 0.7);
+        padding: 3px 8px;
+        border-radius: 4px;
+        opacity: 0;
+        z-index: 20;
+    }
+
+
+</style>
+</head>
+<body>
+
+<div class="container" id="mainContainerP11">
+    <div id="subtitle31" class="subtitle">每天用一点点“认知整理术”，</div>
+    <div id="subtitle32" class="subtitle">你的大脑就不会像积水的盆——发霉、长菌</div>
+
+    <div id="organization-tech-scene">
+        <!-- Shapes will be added by JS -->
+        <svg id="hand-arranging-svg" viewBox="0 0 24 24">
+             <path d="M4,10V13H10L10.5,12.5L12.26,10.73C12.5,10.5 12.74,10.26 12.96,10.04L14.96,8.04C15.39,7.61 16,7.43 16.63,7.5C17.26,7.57 17.81,7.89 18.13,8.38L21.13,12.38C21.32,12.63 21.41,12.93 21.38,13.22C21.35,13.51 21.21,13.78 21,14C20.79,14.21 20.5,14.33 20.19,14.33H10V19A1,1 0 0,1 9,20H5A1,1 0 0,1 4,19V10Z"/>
+        </svg>
+    </div>
+
+    <div id="basin-scene">
+        <svg id="basin-svg" viewBox="0 0 300 200">
+            <path id="basin-outline" d="M20 180 Q 150 220 280 180 L 260 50 Q 150 10 40 50 Z" />
+            <path id="murky-water" d="M40 55 Q 150 15 260 55 L 258 170 Q 150 210 42 170 Z" />
+            <!-- Mold spots, to be added if needed, or use overlay divs -->
+            <circle class="mold-spot" id="mold1" cx="100" cy="100" r="0" />
+            <circle class="mold-spot" id="mold2" cx="150" cy="80" r="0" />
+            <circle class="mold-spot" id="mold3" cx="200" cy="120" r="0" />
+        </svg>
+        <div id="famei-text" class="effect-text-overlay" style="top:150px; left:300px;">发霉</div>
+        <div id="zhangjun-text" class="effect-text-overlay" style="top:180px; left:450px;">长菌</div>
+    </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+<script>
+    const s31Start = 89033; // 01:29,033
+    const s31Duration = 91866 - 89033; // 2833ms
+
+    const s32Start = 91866; // 01:31,866
+    const s32Duration = 96633 - 91866; // 4767ms
+
+    const timeline = gsap.timeline();
+
+    const orgScene = document.getElementById('organization-tech-scene');
+    const handArranging = document.getElementById('hand-arranging-svg');
+    const basinScene = document.getElementById('basin-scene');
+    const basinSVG = document.getElementById('basin-svg');
+    const murkyWater = document.getElementById('murky-water');
+    const moldSpots = [document.getElementById('mold1'), document.getElementById('mold2'), document.getElementById('mold3')];
+    const fameiText = document.getElementById('famei-text');
+    const zhangjunText = document.getElementById('zhangjun-text');
+
+    const orgShapes = [];
+
+    // --- "Cognitive Organization Technique" Visual ---
+    // Subtitle 31: 每天用一点点“认知整理术”，
+    const s31Time = s31Start / 1000;
+    timeline.to("#subtitle31", { opacity: 1, duration: 0.5, ease: "power2.out" }, s31Time);
+    timeline.to(orgScene, { opacity: 1, duration: 0.1 }, s31Time + 0.2);
+    timeline.call(() => { // Create and animate shapes being organized
+        orgScene.innerHTML = ''; // Clear previous, then re-add hand
+        orgScene.appendChild(handArranging);
+        gsap.set(handArranging, {opacity:0}); // Ensure hand is hidden before its animation
+
+        const startPositions = [{x:100,y:150}, {x:120,y:200}, {x:180,y:160}];
+        const targetPositions = [{x:250,y:180}, {x:300,y:180}, {x:350,y:180}];
+
+        for(let i=0; i<3; i++) {
+            const shape = document.createElement('div');
+            shape.classList.add('org-shape');
+            shape.style.left = startPositions[i].x + 'px';
+            shape.style.top = startPositions[i].y + 'px';
+            shape.style.backgroundColor = `hsl(${180 + i*30}, 70%, 60%)`; // Different colors
+            orgScene.appendChild(shape);
+            orgShapes.push(shape);
+
+            // Hand appears and moves the first shape, then follows subsequent shapes
+            if(i===0) {
+                gsap.to(handArranging, {
+                    opacity: 1,
+                    left: startPositions[i].x - 10,
+                    top: startPositions[i].y - 10,
+                    duration: 0.3,
+                    delay: 0.3 + i * 0.5 // Delay based on index for sequential appearance/movement
+                });
+            }
+            gsap.to(handArranging, { // Hand animates to follow each shape to its target position
+                left: targetPositions[i].x - 10,
+                top: targetPositions[i].y - 10,
+                duration: 0.4,
+                delay: 0.6 + i * 0.5
+            });
+            gsap.to(shape, { // Shape moves to organized position
+                left: targetPositions[i].x + 'px',
+                top: targetPositions[i].y + 'px',
+                rotation: 0,
+                duration: 0.5,
+                delay: 0.6 + i * 0.5, // Staggered move
+                ease: "power1.inOut"
+            });
+        }
+         gsap.to(handArranging, {opacity:0, delay: 0.6 + 2 * 0.5 + 0.4}); // Hand fades after last move
+    }, null, s31Time + 0.2);
+
+    timeline.to("#subtitle31", { opacity: 0, duration: 0.3, ease: "power2.in" }, (s31Start + s31Duration - 300) / 1000);
+    timeline.to(orgScene, { opacity: 0, duration: 0.3, onComplete: () => orgScene.innerHTML = '' }, (s31Start + s31Duration - 100)/1000);
+
+
+    // Subtitle 32: 你的大脑就不会像积水的盆——发霉、长菌
+    const s32Time = s32Start / 1000;
+    timeline.set("#subtitle32", { textContent: "你的大脑就不会像积水的盆——", immediateRender: true }, s32Time);
+    timeline.to("#subtitle32", { opacity: 1, duration: 0.5, ease: "power2.out" }, s32Time);
+    timeline.to(basinScene, { opacity: 1, duration: 0.2 }, s32Time + 0.1);
+
+    // --- Basin Fills with Murky Water ---
+    timeline.to(murkyWater, {
+        attr: { d: "M40 55 Q 150 15 260 55 L 258 170 Q 150 210 42 170 Z" }, // Initial path for fill
+        opacity: 0.7,
+        duration: 0.01 // Appear instantly
+    }, s32Time + 0.3);
+    timeline.fromTo(murkyWater,
+        { scaleY: 0 },
+        { scaleY: 1, duration: 1.0, ease: "power1.out" },
+    s32Time + 0.3); // Water fills up
+
+    // --- Mold Spots Appear and Spread ---
+    const moldAppearTime = s32Time + 1.5;
+    moldSpots.forEach((spot, index) => {
+        timeline.to(spot, {
+            opacity: 0.8,
+            attr: { r: anime.random(15, 25) }, // Grow to random size
+            duration: 0.9, // Slightly longer duration for smoother growth
+            ease: "circ.out" // Smoother, non-bouncy growth
+        }, moldAppearTime + index * 0.3);
+    });
+
+    // --- Text Overlays for "发霉" (Moldy) and "长菌" (Bacteria Growth) ---
+    // Show "发霉", "长菌" text near mold spots (adjust positioning based on mold spots)
+    // These will appear if subtitle doesn't cover them clearly enough
+    timeline.to(fameiText, { opacity: 1, scale:[0.7,1], duration: 0.3, ease:"back.out(1.5)" }, moldAppearTime + 0.2);
+    timeline.to(zhangjunText, { opacity: 1, scale:[0.7,1], duration: 0.3, ease:"back.out(1.5)" }, moldAppearTime + 0.7);
+
+    // Optional: Positive outcome - basin cleans up quickly IF organization was shown to prevent it
+    // For now, just let the negative image persist until fade out.
+    // A quick "rewind" or clean effect could be added if desired.
+    // e.g. timeline.to(orgScene, {opacity:1, duration: 0.1, delay: 1.0}, moldAppearTime + 1.5); // Re-show org
+    // timeline.to([murkyWater, ...moldSpots, fameiText, zhangjunText], {opacity:0, duration:0.3}, moldAppearTime + 1.6);
+
+
+    // End of part
+    const s32EndTime = (s32Start + s32Duration) / 1000;
+    timeline.to(["#subtitle32", basinScene, fameiText, zhangjunText], { // Basin scene includes water & mold
+        opacity: 0,
+        duration: 0.5,
+        ease: "power2.in"
+    }, s32EndTime - 0.5);
+    timeline.call(() => { // Reset basin state for potential replay
+        gsap.set(murkyWater, {opacity:0, scaleY:0});
+        moldSpots.forEach(spot => gsap.set(spot, {opacity:0, attr:{r:0}}));
+        gsap.set([fameiText, zhangjunText], {opacity:0});
+    }, null, s32EndTime);
+
+
+    // timeline.play(); // For testing
+</script>
+</body>
+</html>

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>字幕动画 - Part 12 (Conclusion)</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        background-color: #e9f7ef; /* Light, hopeful green */
+        overflow: hidden;
+    }
+    .container {
+        width: 800px;
+        height: 450px;
+        position: relative;
+        background-color: #f9fefc;
+        box-shadow: 0 0 20px rgba(0,0,0,0.05);
+        border: 1px solid #d4efdf;
+        overflow: hidden;
+    }
+    .subtitle {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 26px;
+        color: #196f3d;
+        padding: 10px 20px;
+        background-color: rgba(232, 248, 239, 0.9);
+        border-radius: 5px;
+        opacity: 0;
+        text-align: center;
+        z-index: 100;
+    }
+
+    /* Scene Elements */
+    #conclusion-scene {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        opacity: 1;
+    }
+    #lightbulb-icon {
+        position: absolute;
+        top: 50px;
+        left: 50px;
+        font-size: 50px; /* For emoji */
+        opacity: 0;
+        text-shadow: 0 0 15px #f4d03f;
+    }
+    #liya-text { /* For "Liya提醒：" */
+        position: absolute;
+        top: 60px;
+        left: 120px;
+        font-size: 24px;
+        font-weight: bold;
+        color: #f39c12; /* Orange like lightbulb */
+        opacity: 0;
+    }
+
+    #water-stream-conclusion-svg {
+        position: absolute;
+        top: 120px;
+        left: 0;
+        width: 100%;
+        height: 250px;
+        opacity: 0;
+        z-index: 5;
+    }
+    .stream-particle { fill: #5dade2; opacity: 0.7; }
+
+    #hands-guiding-svg {
+        position: absolute;
+        top: 180px; /* Over the stream */
+        left: 50%;
+        transform: translateX(-50%);
+        width: 200px;
+        height: 100px;
+        opacity: 0;
+        z-index: 10;
+    }
+    .hand-path {
+        fill: #f5cba7; /* Skin tone */
+        stroke: #c0392b; /* Outline, optional */
+        stroke-width: 1;
+        opacity: 0.8;
+    }
+
+    #channels-and-valves-svg {
+        position: absolute;
+        top: 150px;
+        left: 0;
+        width: 100%;
+        height: 200px;
+        opacity: 0;
+        z-index: 15; /* Above hands if they fade, or manage timing */
+    }
+    .channel-pipe {
+        fill: none;
+        stroke: #aed6f1; /* Light blue for channels */
+        stroke-width: 15;
+        stroke-linecap: round;
+    }
+    .valve-icon-conclusion { /* Smaller versions of valve icons */
+        opacity: 0.8;
+        transform-origin: center;
+    }
+    .valve1-body-concl { fill: #2980b9; }
+    .valve2-body-concl { fill: #27ae60; }
+    .valve3-body-concl { fill: #8e44ad; }
+    .valve-cross-concl { fill: #ecf0f1; }
+
+
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div id="subtitle33" class="subtitle">💡Liya提醒：</div>
+    <div id="subtitle34" class="subtitle">信息是水</div>
+    <div id="subtitle35" class="subtitle">你要做的，不是接更多</div>
+    <div id="subtitle36" class="subtitle">而是疏导有序</div>
+
+    <div id="conclusion-scene">
+        <div id="lightbulb-icon">💡</div>
+        <div id="liya-text">Liya提醒：</div>
+
+        <svg id="water-stream-conclusion-svg" viewBox="0 0 800 250">
+            <!-- Particles will be added by JS -->
+        </svg>
+
+        <svg id="hands-guiding-svg" viewBox="0 0 200 100">
+            <!-- Left Hand -->
+            <path class="hand-path" id="hand-left" d="M60,80 Q40,70 30,50 Q20,30 40,20 Q60,10 80,25 L70,50 Z" />
+            <!-- Right Hand -->
+            <path class="hand-path" id="hand-right" d="M140,80 Q160,70 170,50 Q180,30 160,20 Q140,10 120,25 L130,50 Z" />
+        </svg>
+
+        <svg id="channels-and-valves-svg" viewBox="0 0 800 200">
+            <!-- Channel Path -->
+            <path id="main-channel" class="channel-pipe" d="M50,100 Q200,50 400,100 T750,100" />
+
+            <!-- Valve Icons on the channel -->
+            <g class="valve-icon-conclusion" id="concl-valve1" transform="translate(200 80) scale(0.4)">
+                <circle class="valve1-body-concl" cx="50" cy="50" r="40" stroke="#1f618d" stroke-width="8"/>
+                <rect class="valve-cross-concl" x="45" y="20" width="10" height="60"/>
+                <rect class="valve-cross-concl" x="20" y="45" width="60" height="10" transform="rotate(90 50 50)"/>
+            </g>
+            <g class="valve-icon-conclusion" id="concl-valve2" transform="translate(400 80) scale(0.4)">
+                <circle class="valve2-body-concl" cx="50" cy="50" r="40" stroke="#1e8449" stroke-width="8"/>
+                <rect class="valve-cross-concl" x="45" y="20" width="10" height="60"/>
+                <rect class="valve-cross-concl" x="20" y="45" width="60" height="10" transform="rotate(90 50 50)"/>
+            </g>
+            <g class="valve-icon-conclusion" id="concl-valve3" transform="translate(600 80) scale(0.4)">
+                <circle class="valve3-body-concl" cx="50" cy="50" r="40" stroke="#633974" stroke-width="8"/>
+                <rect class="valve-cross-concl" x="45" y="20" width="10" height="60"/>
+                <rect class="valve-cross-concl" x="20" y="45" width="60" height="10" transform="rotate(90 50 50)"/>
+            </g>
+        </svg>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+<script>
+    const s33Start = 97400; // 01:37,400
+    const s33Duration = 98366 - 97400; // 966ms
+
+    const s34Start = 98733; // 01:38,733
+    const s34Duration = 100000 - 98733; // 1267ms
+
+    const s35Start = 100100; // 01:40,100
+    const s35Duration = 102133 - 100100; // 2033ms
+
+    const s36Start = 102133; // 01:42,133
+    const s36Duration = 104000 - 102133; // 1867ms
+
+    const timeline = gsap.timeline();
+    const svgNS = "http://www.w3.org/2000/svg";
+
+    const lightbulbIcon = document.getElementById('lightbulb-icon');
+    const liyaText = document.getElementById('liya-text');
+    const waterStreamSVG = document.getElementById('water-stream-conclusion-svg');
+    const handsGuidingSVG = document.getElementById('hands-guiding-svg');
+    const handLeft = document.getElementById('hand-left');
+    const handRight = document.getElementById('hand-right');
+    const channelsAndValvesSVG = document.getElementById('channels-and-valves-svg');
+    const mainChannelPath = document.getElementById('main-channel');
+    const conclValves = [document.getElementById('concl-valve1'), document.getElementById('concl-valve2'), document.getElementById('concl-valve3')];
+
+
+    // --- Liya's Reminder (Lightbulb & Text) ---
+    // Subtitle 33: 💡Liya提醒：
+    const s33Time = s33Start / 1000;
+    timeline.set("#subtitle33", { textContent: "💡", immediateRender: true }, s33Time);
+    // Subtitle text "💡Liya提醒：" will be shown. "Liya提醒：" is also visual.
+    timeline.to("#subtitle33", { opacity: 1, duration: 0.3, ease: "power2.out" }, s33Time);
+    timeline.to(lightbulbIcon, { opacity: 1, scale: [0.5, 1.2, 1], duration: 0.5, ease: "elastic.out(1,0.5)" }, s33Time + 0.1); // Lightbulb icon itself
+    timeline.to(liyaText, { opacity: 1, x: [-10, 0], duration: 0.3 }, s33Time + 0.2); // "Liya提醒：" text
+    timeline.to(["#subtitle33", lightbulbIcon, liyaText], { opacity: 0, duration: 0.3, ease: "power2.in" }, (s33Start + s33Duration - 200) / 1000);
+
+    // --- "Information is Water": Calm Stream Visual ---
+    // Subtitle 34: 信息是水 (Calm water stream)
+    const s34Time = s34Start / 1000;
+    timeline.to("#subtitle34", { opacity: 1, duration: 0.4, ease: "power2.out" }, s34Time);
+    timeline.to(waterStreamSVG, { opacity: 1, duration: 0.5 }, s34Time + 0.1);
+    timeline.call(spawnWaterParticles, [waterStreamSVG, 30, 'calm'], s34Time + 0.2);
+    timeline.to("#subtitle34", { opacity: 0, duration: 0.3, ease: "power2.in" }, (s34Start + s34Duration - 300) / 1000);
+    // Water stream particles will continue flowing for a bit
+
+    // --- "Not to take in more": Hands Guiding Water ---
+    // Subtitle 35: 你要做的，不是接更多 (Hands guiding, not catching)
+    const s35Time = s35Start / 1000;
+    timeline.to("#subtitle35", { opacity: 1, duration: 0.4, ease: "power2.out" }, s35Time);
+    timeline.to(handsGuidingSVG, { opacity: 1, scale:[0.8,1], duration: 0.5, ease:"back.out(1.4)" }, s35Time + 0.2);
+    // Hands gently part or guide
+    timeline.to(handLeft, { x: -20, rotation: -10, svgOrigin:"70 50", duration: 0.8, ease: "power1.inOut" }, s35Time + 0.5);
+    timeline.to(handRight, { x: 20, rotation: 10, svgOrigin:"130 50", duration: 0.8, ease: "power1.inOut" }, s35Time + 0.5);
+
+    timeline.to(["#subtitle35", handsGuidingSVG], { opacity: 0, duration: 0.3, ease: "power2.in" }, (s35Start + s35Duration - 300) / 1000);
+    // Water stream (particles) also fades with hands or slightly after
+    timeline.call(() => {
+        anime({ targets: waterStreamSVG.childNodes, opacity: 0, duration: 500, easing: 'linear',
+            complete: () => { if(waterStreamSVG) waterStreamSVG.innerHTML = '';}
+        });
+    }, null, (s35Start + s35Duration - 400) / 1000);
+
+
+    // --- "But to guide it orderly": Water in Channel with Valves ---
+    // Subtitle 36: 而是疏导有序 (Water in channels with valves)
+    const s36Time = s36Start / 1000;
+    timeline.to("#subtitle36", { opacity: 1, duration: 0.4, ease: "power2.out" }, s36Time);
+    timeline.to(channelsAndValvesSVG, { opacity: 1, duration: 0.5 }, s36Time + 0.1);
+    timeline.fromTo(mainChannelPath,
+        { strokeDasharray: 1000, strokeDashoffset: 1000 },
+        { strokeDashoffset: 0, duration: 1.5, ease: "power1.inOut" },
+    s36Time + 0.3); // Channel draws itself
+
+    conclValves.forEach((valve, index) => { // Valves appear on channel
+        timeline.to(valve, { opacity: 1, scale: [0.5, 0.4], duration: 0.4, ease: "back.out(1.5)" }, s36Time + 0.8 + index * 0.2);
+    });
+    // Animate water flowing through the channel path
+    timeline.call(spawnWaterParticles, [channelsAndValvesSVG, 50, 'channel', mainChannelPath], s36Time + 1.0);
+
+
+    // End of animation - fade out all
+    const s36EndTime = (s36Start + s36Duration) / 1000;
+    timeline.to(["#subtitle36", channelsAndValvesSVG], {
+        opacity: 0,
+        duration: 0.5,
+        ease: "power2.in",
+        delay: 0.5 // Let channel flow show a bit longer
+    }, s36EndTime - 0.5);
+     timeline.call(() => { // Clear any remaining channel particles
+        const channelParticles = channelsAndValvesSVG.querySelectorAll('.stream-particle');
+        anime({ targets: channelParticles, opacity: 0, duration: 300, easing: 'linear',
+            complete: () => { channelParticles.forEach(p => p.remove()); }
+        });
+    }, null, s36EndTime -0.2);
+
+
+    function spawnWaterParticles(svgElement, count, type = 'calm', pathElement = null) {
+        if (!svgElement) return;
+        const particles = [];
+        for (let i = 0; i < count; i++) {
+            const particle = document.createElementNS(svgNS, "circle");
+            particle.classList.add('stream-particle');
+            particle.setAttribute('r', anime.random(2, 5));
+            svgElement.appendChild(particle);
+            particles.push(particle);
+        }
+
+        // For 'calm' type, particles flow horizontally across the SVG
+        if (type === 'calm') {
+            particles.forEach(p => {
+                gsap.set(p, { x: anime.random(-50, 0), y: anime.random(0, 250) }); // Start off-screen left
+                anime({
+                    targets: p,
+                    x: "+=" + (svgElement.viewBox.baseVal.width + 100), // Move across the SVG width
+                    opacity: [0.7, 0], // Fade in then out
+                    duration: anime.random(2000, 4000),
+                    delay: anime.random(0, 1000),
+                    loop: true,
+                    easing: 'linear'
+                });
+            });
+        }
+        // For 'channel' type, particles follow the provided SVG path
+        else if (type === 'channel' && pathElement) {
+            const pathMotion = anime.path(pathElement); // Use anime.js path motion utility
+            particles.forEach(p => {
+                 anime({
+                    targets: p,
+                    translateX: pathMotion('x'), // Animate x along path
+                    translateY: pathMotion('y'), // Animate y along path
+                    opacity: [0.7,0.7,0], // Appear, flow, disappear towards end of path
+                    duration: anime.random(2500,3500), // Duration of travel along path
+                    delay: anime.random(0, 1000), // Staggered start
+                    loop: true,
+                    easing: 'cubicBezier(0.420, 0.000, 0.580, 1.000)' // Custom easing for smooth flow
+                });
+            });
+        }
+    }
+
+    // timeline.play(); // For testing
+</script>
+</body>
+</html>
