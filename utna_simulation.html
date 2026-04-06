@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>UTNA 宇宙底层拓扑网络模拟</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #000; color: #fff; font-family: sans-serif; }
+        #info { position: absolute; top: 10px; left: 10px; z-index: 100; pointer-events: none; }
+        h1 { font-size: 20px; color: #00ffff; text-shadow: 0 0 10px #00ffff; }
+        p { font-size: 14px; max-width: 400px; line-height: 1.5; color: #ccc; }
+        .highlight { color: #ff00ff; font-weight: bold; }
+    </style>
+    <!-- 引入 Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <div id="info">
+        <h1>S_UTNA 大一统拓扑网络动态模拟</h1>
+        <p>1. <b>背景涟漪：</b>连线相位涨落 (光子/电磁场)</p>
+        <p>2. <b class="highlight">中心高亮球体：</b>拓扑死结 (法捷耶夫-斯基尔姆机制锁定的稳定质量粒子)</p>
+        <p>3. <b>网格形变：</b>涡旋结扯紧周围连线，呈现 1/r² 的张力衰减 (引力场/度规弯曲的涌现)</p>
+    </div>
+    <script>
+        // 初始化场景、相机和渲染器
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x000000, 0.02);
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(20, 15, 30);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // 创建宇宙底层连线网络 (Random Graph / Lattice)
+        const gridSize = 30;
+        const spacing = 1.5;
+        const geometry = new THREE.BufferGeometry();
+        const positions = [];
+        const colors = [];
+
+        // 核心涡旋结位置
+        const knotPos = new THREE.Vector3(0, 0, 0);
+
+        for (let x = -gridSize/2; x <= gridSize/2; x++) {
+            for (let y = -gridSize/2; y <= gridSize/2; y++) {
+                for (let z = -gridSize/2; z <= gridSize/2; z++) {
+                    // 原始平坦坐标
+                    let p = new THREE.Vector3(x * spacing, y * spacing, z * spacing);
+
+                    // 引力涌现：核心质量对网格的拓扑拉扯形变 (1/r^2 衰减的引力势)
+                    let dist = p.distanceTo(knotPos);
+                    let deformation = 0;
+                    if (dist > 0.1) {
+                        // 模拟引力吸引和核心的致密排斥项
+                        deformation = 5 / (dist * dist);
+                        p.lerp(knotPos, Math.min(deformation, 0.8)); // 向中心坍缩
+                    }
+
+                    positions.push(p.x, p.y, p.z);
+
+                    // 颜色映射：越靠近中心（张力越大），越呈现高能品红色；外围呈现低能青色
+                    let intensity = Math.min(deformation * 2, 1);
+                    colors.push(
+                        intensity * 1.0 + (1 - intensity) * 0.0, // R
+                        (1 - intensity) * 0.8,                   // G
+                        intensity * 1.0 + (1 - intensity) * 1.0  // B
+                    );
+                }
+            }
+        }
+
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+
+        // 材质：表示底层相位的连线
+        const material = new THREE.PointsMaterial({
+            size: 0.3,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending
+        });
+
+        const network = new THREE.Points(geometry, material);
+        scene.add(network);
+
+        // 中心拓扑涡旋死结 (Fermion / 质量源)
+        const knotGeo = new THREE.SphereGeometry(1.5, 32, 32);
+        const knotMat = new THREE.MeshBasicMaterial({
+            color: 0xff00ff,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.9
+        });
+        const knot = new THREE.Mesh(knotGeo, knotMat);
+        scene.add(knot);
+
+        // 动画循环：模拟相位流体的动力学演化
+        let clock = new THREE.Clock();
+        function animate() {
+            requestAnimationFrame(animate);
+            let time = clock.getElapsedTime();
+
+            // 1. 整体网格的宏观缓慢自转 (洛伦兹不变性的涌现背景)
+            network.rotation.y = time * 0.05;
+
+            // 2. 模拟微观相位波 (电磁波/张力波) 的传递
+            const positions = network.geometry.attributes.position.array;
+            for (let i = 0; i < positions.length; i += 3) {
+                // 仅施加微小的横向高频振荡
+                positions[i+1] += Math.sin(time * 5 + positions[i]) * 0.01;
+            }
+            network.geometry.attributes.position.needsUpdate = true;
+
+            // 3. 涡旋结的自旋与呼吸 (瞬子拓扑纠缠特性)
+            knot.rotation.x += 0.02;
+            knot.rotation.y += 0.03;
+            let pulse = 1 + Math.sin(time * 8) * 0.05;
+            knot.scale.set(pulse, pulse, pulse);
+
+            renderer.render(scene, camera);
+        }
+
+        // 窗口大小适配
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>
