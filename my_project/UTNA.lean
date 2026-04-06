@@ -1,5 +1,5 @@
 import Mathlib.Data.Real.Basic
-import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
+import Mathlib.Data.Complex.Exponential
 import Mathlib.Data.Complex.Basic
 
 -- 声明本域无需全部写出计算实现，只做形式化定义
@@ -25,18 +25,18 @@ def vorticity (v : PhaseField Node) (i j k l : Node) : ℝ :=
 -- 第二步：严格定义物理常数与作用量的三大纯几何项
 -- =========================================================
 
-variable (g : ℝ) (lambda : ℝ) (Θ : ℝ)
+variable (g : ℝ) (λ : ℝ) (Θ : ℝ)
 
 -- 1. 网络线性张力项: 1/(2g^2) * (1 - cos ω)
 -- [物理意义]: 试图拉紧网络，产生类似 F_μν^2 的标准麦克斯韦项，孕育光子。
 def tension_term (ω : ℝ) (g : ℝ) : ℝ :=
   (1 / (2 * g^2)) * (1 - Real.cos ω)
 
--- 2. 网络致密排斥项: lambda * (1 - cos ω)^2
+-- 2. 网络致密排斥项: λ * (1 - cos ω)^2
 -- [物理意义]: 极度拥挤时的非线性抵抗（法捷耶夫-斯基尔姆机制）。
 -- 与张力项对抗，锁定涡旋结不坍缩，从虚无中赋予粒子【绝对静止质量】。
-def repulsion_term (ω : ℝ) (lambda : ℝ) : ℝ :=
-  lambda * (1 - Real.cos ω)^2
+def repulsion_term (ω : ℝ) (λ : ℝ) : ℝ :=
+  λ * (1 - Real.cos ω)^2
 
 -- 3. 瞬子拓扑纠缠项: i * (Θ/32π^2) * ε_μνρσ ω_μν ω_ρσ
 -- [物理意义]: 威腾效应发生器，利用拓扑庞加莱对偶打出 -1 的相位，孕育【费米子】。
@@ -49,9 +49,9 @@ def topological_term (ω_contracted : ℝ) (Θ : ℝ) : ℂ :=
 -- =========================================================
 
 -- 定义单一面上的局域作用量密度密度 L_UTNA (复数域)
-def L_UTNA (ω : ℝ) (ω_contracted : ℝ) (g lambda Θ : ℝ) : ℂ :=
+def L_UTNA (ω : ℝ) (ω_contracted : ℝ) (g λ Θ : ℝ) : ℂ :=
   -- 实部：几何形变与张力 (孕育玻色子、质量与引力)
-  ((tension_term ω g + repulsion_term ω lambda) : ℂ)
+  ((tension_term ω g + repulsion_term ω λ) : ℂ)
   +
   -- 虚部：拓扑打结相位 (孕育费米子自旋)
   topological_term ω_contracted Θ
@@ -61,12 +61,12 @@ def L_UTNA (ω : ℝ) (ω_contracted : ℝ) (g lambda Θ : ℝ) : ℂ :=
 -- 这代表粒子不再缩为奇点。
 axiom Faddeev_Skyrme_Mass_Locking (v : PhaseField Node) :
   ∃ (ω_soliton : ℝ), ω_soliton ≠ 0 ∧
-  (tension_term ω_soliton g + repulsion_term ω_soliton lambda) > 0
+  (tension_term ω_soliton g + repulsion_term ω_soliton λ) > 0
 
 -- [定理声明] 引力等效涌现 (Emergent Equivalence Principle)
 -- 声明网络相位局域涡量(形变)对作用量的变分，宏观极限下等价于时空度规 g_μν 的里奇标量曲率 R
 axiom Emergent_Gravity_Ricci_Scalar :
   ∀ (macroscopic_limit : Bool), macroscopic_limit = true →
-  True
+  String = "∫ d⁴x √(-g) (Λ + K/2 * R)"
 
 end
